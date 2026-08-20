@@ -15,6 +15,10 @@ function FieldError({
   field,
 }: {
   errors: AuthState["errors"];
+  values?: {
+    email?: string;
+    userName?: string;
+  };
   field: AuthField;
 }) {
   const message = errors?.[field]?.[0];
@@ -37,7 +41,6 @@ export default function AuthPage({ mode }: AuthPageProps) {
     action,
     {},
   );
-
   return (
     <main className={styles.page}>
       <div className={styles.shell}>

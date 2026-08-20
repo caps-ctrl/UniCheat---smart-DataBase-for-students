@@ -84,6 +84,18 @@ export async function register(
   if (!result.success) {
     return validationFailure(result.error.flatten().fieldErrors);
   }
+  const allowedDomain = "zut.edu.pl";
+  const emailDomain = result.data.email.split("@")[1];
+
+  if (emailDomain !== allowedDomain) {
+    return {
+      errors: {
+        email: ["Dozwolone są wyłącznie adresy w domenie @zut.edu.pl."],
+      },
+
+      message: "Popraw zaznaczone pola.",
+    };
+  }
 
   const { userName, firstName, lastName, email, password } = result.data;
 

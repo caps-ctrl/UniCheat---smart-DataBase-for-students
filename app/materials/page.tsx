@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { NavBar } from "@/components/layout/Navbar/NavBar";
-import MaterialsDirectory from "./MaterialsDirectory";
+
 import styles from "./materials.module.css";
+import SemesterList from "./SemesterList";
 
 export const metadata: Metadata = {
   title: "Materiały studenckie | uniCheat",
@@ -39,26 +40,7 @@ export default function MaterialsPage() {
           </div>
         </section>
 
-        <div className={styles.trustBar}>
-          <div>
-            <strong>2 400+</strong>
-            <span>dostępnych materiałów</span>
-          </div>
-          <div>
-            <strong>380</strong>
-            <span>przedmiotów</span>
-          </div>
-          <div>
-            <strong>4.8/5</strong>
-            <span>średnia ocena</span>
-          </div>
-          <p>
-            Materiały pochodzą od społeczności. Zawsze porównuj je z aktualnymi
-            wymaganiami prowadzącego.
-          </p>
-        </div>
-
-        <MaterialsDirectory />
+        <SemesterList />
       </div>
     </main>
   );
