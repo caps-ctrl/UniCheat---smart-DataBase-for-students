@@ -29,6 +29,8 @@ import styles from "./subject.module.css";
 
 type SubjectPageProps = {
   params: Promise<{
+    faculty: string;
+    course: string;
     semester: string;
     subject: string;
   }>;
@@ -132,7 +134,10 @@ export default async function SubjectPage({
   params,
   searchParams,
 }: SubjectPageProps) {
-  const [{ semester, subject: subjectSlug }, query] = await Promise.all([
+  const [
+    { faculty, course, semester, subject: subjectSlug },
+    query,
+  ] = await Promise.all([
     params,
     searchParams,
   ]);
@@ -153,7 +158,9 @@ export default async function SubjectPage({
         <NavBar />
 
         <nav className={styles.breadcrumbs} aria-label="Okruszki">
-          <Link href={`/materials/semesters/${data.semester.number}`}>
+          <Link
+            href={`/materials/${encodeURIComponent(faculty)}/${encodeURIComponent(course)}/${data.semester.number}`}
+          >
             <ArrowLeft size={15} aria-hidden="true" />
             Semestr {data.semester.number}
           </Link>
@@ -224,7 +231,7 @@ export default async function SubjectPage({
                 return (
                   <Link
                     key={channel.type}
-                    href={`/materials/semesters/${data.semester.number}/${data.subject.slug}?channel=${channel.type}`}
+                    href={`/materials/${encodeURIComponent(faculty)}/${encodeURIComponent(course)}/${data.semester.number}/${data.subject.slug}?channel=${channel.type}`}
                     className={isActive ? styles.activeTab : undefined}
                     aria-current={isActive ? "page" : undefined}
                   >

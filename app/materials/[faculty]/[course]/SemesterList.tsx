@@ -9,7 +9,12 @@ import {
   Route,
   Timer,
 } from "lucide-react";
-import styles from "./materials.module.css";
+import styles from "../../materials.module.css";
+
+type SemesterListProps = {
+  faculty: string;
+  course: string;
+};
 
 const semesters = [
   {
@@ -159,7 +164,7 @@ function SemesterArtwork({ kind }: { kind: string }) {
   );
 }
 
-export default function SemesterList() {
+export default function SemesterList({ faculty, course }: SemesterListProps) {
   return (
     <section
       className={styles.semesterList}
@@ -186,7 +191,7 @@ export default function SemesterList() {
               {index % 2 === 0 && <h3>{Math.ceil(index / 2) + 1} Rok</h3>}
             </div>
             <Link
-              href={`/materials/semesters/${semester.number}`}
+              href={`/materials/${encodeURIComponent(faculty)}/${encodeURIComponent(course)}/${semester.number}`}
               className={styles.semesterTileLink}
             >
               <article

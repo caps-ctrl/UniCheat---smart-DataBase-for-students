@@ -9,6 +9,8 @@ import styles from "./semester.module.css";
 
 type SemesterPageProps = {
   params: Promise<{
+    faculty: string;
+    course: string;
     semester: string;
   }>;
 };
@@ -29,7 +31,7 @@ export async function generateMetadata({
 }
 
 export default async function SemesterPage({ params }: SemesterPageProps) {
-  const { semester } = await params;
+  const { faculty, course, semester } = await params;
   const semesterNumber = Number(semester);
   const semesterData = semesters.find((item) => item.number === semesterNumber);
 
@@ -40,7 +42,10 @@ export default async function SemesterPage({ params }: SemesterPageProps) {
       <div className={styles.shell}>
         <NavBar />
 
-        <Link href="/materials" className={styles.backLink}>
+        <Link
+          href={`/materials/${encodeURIComponent(faculty)}/${encodeURIComponent(course)}`}
+          className={styles.backLink}
+        >
           <ArrowLeft size={16} aria-hidden="true" />
           Wróć do wszystkich semestrów
         </Link>
@@ -64,6 +69,8 @@ export default async function SemesterPage({ params }: SemesterPageProps) {
             <SubjectCards
               subjects={semesterData.subjects}
               semesterNumber={semesterData.number}
+              faculty={faculty}
+              course={course}
             />
           ) : (
             <div className={styles.emptyState}>
@@ -77,7 +84,11 @@ export default async function SemesterPage({ params }: SemesterPageProps) {
                   zostaną dodane do katalogu.
                 </p>
               </div>
-              <Link href="/materials">Wybierz inny semestr</Link>
+              <Link
+                href={`/materials/${encodeURIComponent(faculty)}/${encodeURIComponent(course)}`}
+              >
+                Wybierz inny semestr
+              </Link>
             </div>
           )}
         </section>

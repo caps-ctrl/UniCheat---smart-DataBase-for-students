@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-
+import type { Database } from "../database.types";
 function redirectWithSession(url: URL, sessionResponse: NextResponse) {
   const redirectResponse = NextResponse.redirect(url);
 
@@ -28,7 +28,7 @@ export async function updateSession(request: NextRequest) {
 
   let response = NextResponse.next({ request });
 
-  const supabase = createServerClient(url, publishableKey, {
+  const supabase = createServerClient<Database>(url, publishableKey, {
     cookies: {
       getAll() {
         return request.cookies.getAll();

@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { BookOpenCheck, LogIn } from "lucide-react";
 import { NavBar } from "@/components/layout/Navbar/NavBar";
-
+import { createClient } from "@/lib/supabase/server";
 import styles from "./materials.module.css";
-import SemesterList from "./SemesterList";
+
 
 export const metadata: Metadata = {
   title: "Materiały studenckie | uniCheat",
@@ -10,37 +13,83 @@ export const metadata: Metadata = {
     "Notatki, opracowania, zestawy zadań i materiały przekazane przez poprzednich studentów ZUT.",
 };
 
-export default function MaterialsPage() {
+async function getMaterialsDestination() {
+  // NOTE: Jeśli ta kontrola będzie używana poza /materials, warto przenieść
+  // ją do np. lib/queries/materials-access.ts. Na razie celowo pozostaje lokalna.
+  const supabase = await createClient();
+
+  //Usunac ---
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: "test1@zut.edu.pl",
+    password: "zaq1@WSX",
+  });
+
+  if (error) {
+    console.log("Niepoprawne hasło");
+  } else {
+    console.log("Hasło poprawne");
+  }
+  //------
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) return null;
+
+
+
+
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select(
+      `faculty_id,
+       course_id,
+     faculty:faculties(slug),
+      course:courses(slug)`,
+    )
+    .eq("id", user.id)
+    .single();
+
+  if (profileError) {
+    console.error("Błąd sprawdzania dostępu do materiałów:", profileError);
+    return null;
+  }
+
+  if (profile?.faculty_id == null || profile.course_id == null) return null;
+
+
+  const faculty = encodeURIComponent(String(profile.faculty?.slug));
+  const course = encodeURIComponent(String(profile.course?.slug));
+
+  return `/materials/${faculty}/${course}`;
+}
+
+export default async function MaterialsPage() {
+  const destination = await getMaterialsDestination();
+
+  if (destination) redirect(destination);
+
   return (
     <main className={styles.page}>
       <div className={styles.shell}>
         <NavBar />
 
-        <section className={styles.hero} aria-labelledby="materials-title">
-          <div className={styles.heroCopy}>
-            <p className={styles.eyebrow}>Wiedza przekazywana dalej</p>
-            <h1 id="materials-title">
-              Materiały od studentów, <span>dla studentów.</span>
-            </h1>
-            <p>
-              Korzystaj z notatek, opracowań i zestawów zadań przygotowanych
-              przez osoby, które zaliczały te przedmioty przed Tobą.
-            </p>
-          </div>
-          <div className={styles.heroVisual} aria-hidden="true">
-            <div className={styles.documentBack} />
-            <div className={styles.document}>
-              <span>PDF</span>
-              <i />
-              <i />
-              <i />
-              <strong>ALGORYTMY</strong>
-            </div>
-            <div className={styles.spark}>✦</div>
-          </div>
+        <section className={styles.accessGate} aria-labelledby="access-title">
+          <span className={styles.accessIcon} aria-hidden="true">
+            <BookOpenCheck size={34} />
+          </span>
+          <p className={styles.eyebrow}>Materiały dla Twojego kierunku</p>
+          <h1 id="access-title">Zaloguj się, aby otworzyć materiały</h1>
+          <p>
+            Po zalogowaniu sprawdzimy Twój wydział i kierunek, a następnie
+            przeniesiemy Cię prosto do wyboru semestru.
+          </p>
+          <Link href="/login" className={styles.accessAction}>
+            <LogIn size={18} aria-hidden="true" />
+            Przejdź do logowania
+          </Link>
         </section>
-
-        <SemesterList />
       </div>
     </main>
   );

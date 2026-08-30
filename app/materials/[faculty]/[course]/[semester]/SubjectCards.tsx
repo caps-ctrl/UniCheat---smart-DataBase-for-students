@@ -49,11 +49,15 @@ const channelDetails: Record<
 };
 
 type SubjectCardsProps = {
+  faculty: string;
+  course: string;
   semesterNumber: number;
   subjects: Subject[];
 };
 
 export default function SubjectCards({
+  faculty,
+  course,
   semesterNumber,
   subjects,
 }: SubjectCardsProps) {
@@ -196,7 +200,7 @@ export default function SubjectCards({
                 return (
                   <Link
                     key={channel.type}
-                    href={`/materials/semesters/${semesterNumber}/${selectedSubject.slug}?channel=${channel.type}`}
+                    href={`/materials/${encodeURIComponent(faculty)}/${encodeURIComponent(course)}/${semesterNumber}/${selectedSubject.slug}?channel=${channel.type}`}
                     className={styles.modalOption}
                   >
                     <span aria-hidden="true">
