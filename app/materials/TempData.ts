@@ -6,9 +6,10 @@ export type SubjectChannel = {
 };
 
 export type Subject = {
+
   name: string;
   slug: string;
-  channels: SubjectChannel[];
+  subject_channels: SubjectChannel[];
   theme: "sand" | "blue" | "ink" | "violet";
   icon: "sigma" | "atom" | "code" | "flask";
 };
@@ -27,7 +28,7 @@ export const semesters: Semester[] = [
         slug: "matematyka-stosowana-ze-statystyka",
         theme: "sand",
         icon: "sigma",
-        channels: [
+        subject_channels: [
           {
             type: "lecture",
             label: "📖 Wykład",
@@ -44,7 +45,7 @@ export const semesters: Semester[] = [
         slug: "fizyka-dla-informatykow",
         theme: "blue",
         icon: "atom",
-        channels: [
+        subject_channels: [
           {
             type: "lecture",
             label: "📖 Wykład",
@@ -61,7 +62,7 @@ export const semesters: Semester[] = [
         slug: "algebra-liniowa",
         theme: "violet",
         icon: "sigma",
-        channels: [
+        subject_channels: [
           {
             type: "lecture",
             label: "📖 Wykład",
@@ -78,7 +79,7 @@ export const semesters: Semester[] = [
         slug: "algorytmy-1",
         theme: "ink",
         icon: "code",
-        channels: [
+        subject_channels: [
           {
             type: "lecture",
             label: "📖 Wykład",
@@ -104,7 +105,7 @@ export const semesters: Semester[] = [
         slug: "algorytmy-2",
         theme: "ink",
         icon: "code",
-        channels: [
+        subject_channels: [
           {
             type: "lecture",
             label: "📖 Wykład",
@@ -121,7 +122,7 @@ export const semesters: Semester[] = [
         slug: "architektura-systemow-komputerowych",
         theme: "blue",
         icon: "atom",
-        channels: [
+        subject_channels: [
           {
             type: "lecture",
             label: "📖 Wykład",
@@ -138,7 +139,7 @@ export const semesters: Semester[] = [
         slug: "bazy-danych-1",
         theme: "ink",
         icon: "code",
-        channels: [
+        subject_channels: [
           {
             type: "lecture",
             label: "📖 Wykład",
@@ -155,7 +156,7 @@ export const semesters: Semester[] = [
         slug: "jezyk-java",
         theme: "ink",
         icon: "code",
-        channels: [
+        subject_channels: [
           {
             type: "lecture",
             label: "📖 Wykład",
@@ -172,7 +173,7 @@ export const semesters: Semester[] = [
         slug: "sieci-komputerowe",
         theme: "blue",
         icon: "atom",
-        channels: [
+        subject_channels: [
           {
             type: "lecture",
             label: "📖 Wykład",
@@ -189,7 +190,7 @@ export const semesters: Semester[] = [
         slug: "systemy-operacyjne",
         theme: "ink",
         icon: "code",
-        channels: [
+        subject_channels: [
           {
             type: "lecture",
             label: "📖 Wykład",

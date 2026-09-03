@@ -18,18 +18,7 @@ async function getMaterialsDestination() {
   // ją do np. lib/queries/materials-access.ts. Na razie celowo pozostaje lokalna.
   const supabase = await createClient();
 
-  //Usunac ---
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: "test1@zut.edu.pl",
-    password: "zaq1@WSX",
-  });
 
-  if (error) {
-    console.log("Niepoprawne hasło");
-  } else {
-    console.log("Hasło poprawne");
-  }
-  //------
   const {
     data: { user },
     error: userError,

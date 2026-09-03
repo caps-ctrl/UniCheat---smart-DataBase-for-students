@@ -3,21 +3,73 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, FolderOpen, LibraryBig } from "lucide-react";
 import { NavBar } from "@/components/layout/Navbar/NavBar";
-import { semesters } from "../../../TempData";
+// import { semesters } from "../../../TempData";
 import SubjectCards from "./SubjectCards";
 import styles from "./semester.module.css";
+import { createClient } from "@/lib/supabase/server";
+
+
+
+
 
 type SemesterPageProps = {
   params: Promise<{
     faculty: string;
     course: string;
-    semester: string;
+    semester: number;
   }>;
 };
 
-export function generateStaticParams() {
-  return semesters.map(({ number }) => ({ semester: String(number) }));
+
+
+async function getSemesterData({ params }: SemesterPageProps) {
+  const supabase = await createClient();
+
+  const id = (await params).semester;
+
+  const { data: semester, error: semesterError } = await supabase
+    .from("semesters")
+    .select(
+      `number,
+      subjects(
+        name,
+        slug,
+        theme,
+        icon,
+        subject_channels(
+          type,label
+          )
+          )`,
+
+    )
+    .eq("id", id)
+    .single();
+
+  if (semesterError) {
+    console.error("Błąd sprawdzania dostępu do materiałów:", semesterError);
+    return null;
+  }
+
+  if (semester.number == null) return null;
+
+
+
+
+
+
+  return semester;
+
 }
+
+
+
+
+
+
+
+
+
+
 
 export async function generateMetadata({
   params,
@@ -31,11 +83,18 @@ export async function generateMetadata({
 }
 
 export default async function SemesterPage({ params }: SemesterPageProps) {
-  const { faculty, course, semester } = await params;
-  const semesterNumber = Number(semester);
-  const semesterData = semesters.find((item) => item.number === semesterNumber);
 
+  const semesterData = await getSemesterData({ params });
+  const { faculty, course, semester } = await params;
+
+
+
+
+  console.log(semesterData?.subjects);
   if (!semesterData) notFound();
+
+
+
 
   return (
     <main className={styles.page}>

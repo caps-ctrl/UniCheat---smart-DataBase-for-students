@@ -49,6 +49,7 @@ const channelDetails: Record<
 };
 
 type SubjectCardsProps = {
+
   faculty: string;
   course: string;
   semesterNumber: number;
@@ -127,7 +128,7 @@ export default function SubjectCards({
               </div>
 
               <div className={styles.channelPreview} aria-hidden="true">
-                {subject.channels.map((channel) => {
+                {subject.subject_channels.map((channel) => {
                   const details = channelDetails[channel.type];
                   const ChannelIcon = details.icon;
 
@@ -143,8 +144,8 @@ export default function SubjectCards({
               <footer className={styles.cardFooter}>
                 <span>
                   <FolderOpen size={13} aria-hidden="true" />
-                  {subject.channels.length}{" "}
-                  {subject.channels.length === 1 ? "sekcja" : "sekcje"}
+                  {subject.subject_channels.length}{" "}
+                  {subject.subject_channels.length === 1 ? "sekcja" : "sekcje"}
                 </span>
                 <span className={styles.chooseAction}>
                   Wybierz materiały
@@ -193,7 +194,7 @@ export default function SubjectCards({
             </p>
 
             <div className={styles.modalOptions}>
-              {selectedSubject.channels.map((channel) => {
+              {selectedSubject.subject_channels.map((channel) => {
                 const details = channelDetails[channel.type];
                 const ChannelIcon = details.icon;
 

@@ -51,6 +51,13 @@ export default function ProfileSettings({
     window.setTimeout(() => setSaved(false), 2400);
   }
 
+  const initials = profile.full_name
+    ?.trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join("");
+
   return (
     <main className={styles.page}>
       <div className={styles.shell}>
@@ -66,7 +73,7 @@ export default function ProfileSettings({
           </div>
           <div className={styles.profileSummary}>
             <div className={styles.avatar} aria-hidden="true">
-              {profile.avatar_url ?? profile.username[0]}
+              {profile.avatar_url ?? initials.toUpperCase()}
             </div>
             <div>
               <strong>{profile.full_name}</strong>

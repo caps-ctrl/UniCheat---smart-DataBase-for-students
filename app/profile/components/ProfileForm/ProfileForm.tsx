@@ -139,7 +139,7 @@ export function ProfileForm({
 
       <div className={styles.avatarEditor}>
         <div className={styles.largeAvatar} aria-hidden="true">
-          {initials}
+          {initials.toUpperCase()}
         </div>
         <div>
           <h2 className="text-2xl font-bold">{profile.full_name}</h2>
