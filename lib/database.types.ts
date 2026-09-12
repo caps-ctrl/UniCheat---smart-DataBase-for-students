@@ -77,7 +77,7 @@ export type Database = {
           course_id: number | null
           created_at: string
           faculty_id: number | null
-          full_name: string | null
+          full_name: string
           github_url: string | null
           id: string
           interests: string[] | null
@@ -86,7 +86,7 @@ export type Database = {
           semester: number | null
           university: string | null
           updated_at: string
-          username: string | null
+          username: string
         }
         Insert: {
           avatar_url?: string | null
@@ -94,7 +94,7 @@ export type Database = {
           course_id?: number | null
           created_at?: string
           faculty_id?: number | null
-          full_name?: string | null
+          full_name: string
           github_url?: string | null
           id: string
           interests?: string[] | null
@@ -103,7 +103,7 @@ export type Database = {
           semester?: number | null
           university?: string | null
           updated_at?: string
-          username?: string | null
+          username: string
         }
         Update: {
           avatar_url?: string | null
@@ -111,7 +111,7 @@ export type Database = {
           course_id?: number | null
           created_at?: string
           faculty_id?: number | null
-          full_name?: string | null
+          full_name?: string
           github_url?: string | null
           id?: string
           interests?: string[] | null
@@ -120,7 +120,7 @@ export type Database = {
           semester?: number | null
           university?: string | null
           updated_at?: string
-          username?: string | null
+          username?: string
         }
         Relationships: [
           {

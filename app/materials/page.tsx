@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { BookOpenCheck, LogIn } from "lucide-react";
 import { NavBar } from "@/components/layout/Navbar/NavBar";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/queries/getCurrentProfile";
 import styles from "./materials.module.css";
 
 
@@ -13,51 +13,16 @@ export const metadata: Metadata = {
     "Notatki, opracowania, zestawy zadań i materiały przekazane przez poprzednich studentów ZUT.",
 };
 
-async function getMaterialsDestination() {
-  // NOTE: Jeśli ta kontrola będzie używana poza /materials, warto przenieść
-  // ją do np. lib/queries/materials-access.ts. Na razie celowo pozostaje lokalna.
-  const supabase = await createClient();
-
-
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) return null;
-
-
-
-
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select(
-      `faculty_id,
-       course_id,
-     faculty:faculties(slug),
-      course:courses(slug)`,
-    )
-    .eq("id", user.id)
-    .single();
-
-  if (profileError) {
-    console.error("Błąd sprawdzania dostępu do materiałów:", profileError);
-    return null;
-  }
-
-  if (profile?.faculty_id == null || profile.course_id == null) return null;
-
-
-  const faculty = encodeURIComponent(String(profile.faculty?.slug));
-  const course = encodeURIComponent(String(profile.course?.slug));
-
-  return `/materials/${faculty}/${course}`;
-}
 
 export default async function MaterialsPage() {
-  const destination = await getMaterialsDestination();
+  const profile = await getCurrentProfile();
 
-  if (destination) redirect(destination);
+  if (profile) {
+    const faculty = encodeURIComponent(String(profile.faculty?.slug));
+    const course = encodeURIComponent(String(profile.course?.slug));
+    if (profile?.faculty_id == null || profile.course_id == null) return "TUTAJ DAC LINK DO UZUPELNIENIA PROFILU";
+    redirect(`/materials/${faculty}/${course}`);
+  }
 
   return (
     <main className={styles.page}>

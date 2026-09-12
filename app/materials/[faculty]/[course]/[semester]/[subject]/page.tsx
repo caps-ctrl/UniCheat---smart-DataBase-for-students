@@ -20,12 +20,10 @@ import {
   UsersRound,
 } from "lucide-react";
 import { NavBar } from "@/components/layout/Navbar/NavBar";
-import {
-  semesters,
-  type ChannelType,
-  type Subject,
-} from "../../../../TempData";
+import { getCurrentSubject } from "@/lib/queries/getCurrentSubject";
+import type { ChannelType, Subject } from "../types";
 import styles from "./subject.module.css";
+
 
 type SubjectPageProps = {
   params: Promise<{
@@ -86,15 +84,10 @@ const channelDetails: Record<
   },
 };
 
-function findSubject(semesterParam: string, subjectSlug: string) {
-  const semesterNumber = Number(semesterParam);
-  const semester = semesters.find((item) => item.number === semesterNumber);
-  const subject = semester?.subjects.find((item) => item.slug === subjectSlug);
 
-  if (!semester || !subject) return null;
 
-  return { semester, subject };
-}
+
+
 
 function getActiveChannel(subject: Subject, channelParam?: string | string[]) {
   const requestedChannel = Array.isArray(channelParam)
@@ -102,25 +95,26 @@ function getActiveChannel(subject: Subject, channelParam?: string | string[]) {
     : channelParam;
 
   return (
-    subject.channels.find((channel) => channel.type === requestedChannel) ??
-    subject.channels[0]
-  );
-}
-
-export function generateStaticParams() {
-  return semesters.flatMap((semester) =>
-    semester.subjects.map((subject) => ({
-      semester: String(semester.number),
-      subject: subject.slug,
-    })),
+    subject.subject_channels.find(
+      (channel) => channel.type === requestedChannel,
+    ) ?? subject.subject_channels[0]
   );
 }
 
 export async function generateMetadata({
   params,
 }: SubjectPageProps): Promise<Metadata> {
-  const { semester, subject: subjectSlug } = await params;
-  const data = findSubject(semester, subjectSlug);
+  const { faculty, course, semester, subject: subjectSlug } = await params;
+  const semesterNumber = Number(semester);
+
+  if (!Number.isInteger(semesterNumber) || semesterNumber < 1) return {};
+
+  const data = await getCurrentSubject(
+    faculty,
+    course,
+    semesterNumber,
+    subjectSlug,
+  );
 
   if (!data) return {};
 
@@ -141,7 +135,16 @@ export default async function SubjectPage({
     params,
     searchParams,
   ]);
-  const data = findSubject(semester, subjectSlug);
+  const semesterNumber = Number(semester);
+
+  if (!Number.isInteger(semesterNumber) || semesterNumber < 1) notFound();
+
+  const data = await getCurrentSubject(
+    faculty,
+    course,
+    semesterNumber,
+    subjectSlug,
+  );
 
   if (!data) notFound();
 
@@ -187,8 +190,10 @@ export default async function SubjectPage({
             <div className={styles.heroMeta}>
               <span>
                 <FolderOpen size={14} aria-hidden="true" />
-                {data.subject.channels.length}{" "}
-                {data.subject.channels.length === 1 ? "sekcja" : "sekcje"}
+                {data.subject.subject_channels.length}{" "}
+                {data.subject.subject_channels.length === 1
+                  ? "sekcja"
+                  : "sekcje"}
               </span>
               <span>
                 <UsersRound size={14} aria-hidden="true" />
@@ -223,7 +228,7 @@ export default async function SubjectPage({
             </div>
 
             <div className={styles.channelTabs} aria-label="Rodzaj zajęć">
-              {data.subject.channels.map((channel) => {
+              {data.subject.subject_channels.map((channel) => {
                 const details = channelDetails[channel.type];
                 const ChannelIcon = details.icon;
                 const isActive = channel.type === activeChannel.type;

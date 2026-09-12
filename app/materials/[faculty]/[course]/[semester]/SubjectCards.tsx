@@ -13,8 +13,9 @@ import {
   Sigma,
   X,
 } from "lucide-react";
-import type { ChannelType, Subject } from "../../../TempData";
+
 import styles from "./semester.module.css";
+import type { Subject, ChannelType } from "./types";
 
 const subjectIcons = {
   sigma: Sigma,
@@ -49,7 +50,6 @@ const channelDetails: Record<
 };
 
 type SubjectCardsProps = {
-
   faculty: string;
   course: string;
   semesterNumber: number;

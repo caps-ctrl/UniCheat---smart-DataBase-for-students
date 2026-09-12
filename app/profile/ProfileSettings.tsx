@@ -7,7 +7,12 @@ import { BookOpen, Check, ChevronRight } from "lucide-react";
 import { FormEvent, useState } from "react";
 import styles from "./profile.module.css";
 import { navigation } from "@/data/profile/sideBarData";
-import type { Section, ProfileData, ProfileSettingsProps } from "./types";
+import type { Section, ProfileSettingsProps, ProfileFormType } from "./types";
+
+
+
+
+
 
 export default function ProfileSettings({
   navigationBar,
@@ -16,7 +21,7 @@ export default function ProfileSettings({
   const [section, setSection] = useState<Section>("profile");
   const [saved, setSaved] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [profile, setProfile] = useState<ProfileData>(data);
+  const [profile, setProfile] = useState<ProfileFormType>(data);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -31,27 +36,28 @@ export default function ProfileSettings({
     setProfile({
       full_name: String(formData.get("firstName") ?? ""),
       username: String(formData.get("username") ?? ""),
-      course: String(formData.get("course") ?? ""),
-      semester: String(formData.get("semester") ?? ""),
-      faculty: String(formData.get("faculty") ?? ""),
+      university: String(formData.get("university") ?? ""),
+      course_id: Number(formData.get("course") ?? null),
+      semester: Number(formData.get("semester") ?? null),
+      faculty_id: Number(formData.get("faculty") ?? null),
       interests: String(formData.get("interests") ?? "")
         .split(",")
         .map((interest) => interest.trim())
         .filter(Boolean),
 
       avatar_url: String(formData.get("avatarUrl") ?? ""),
-      email: String(formData.get("email") ?? ""),
-      githubUrl: String(formData.get("githubUrl") ?? ""),
-      linkedinUrl: String(formData.get("linkedinUrl") ?? ""),
+
+      github_url: String(formData.get("githubUrl") ?? ""),
+      linkedin_url: String(formData.get("linkedinUrl") ?? ""),
       bio: String(formData.get("bio") ?? ""),
-      isPrivate: formData.get("isPrivate") === "on",
+      is_profile_public: formData.get("isPrivate") === "on",
     });
     setIsEditingProfile(false);
     setSaved(true);
     window.setTimeout(() => setSaved(false), 2400);
   }
 
-  const initials = profile.full_name
+  const initials = profile.username
     ?.trim()
     .split(/\s+/)
     .slice(0, 2)
@@ -76,7 +82,7 @@ export default function ProfileSettings({
               {profile.avatar_url ?? initials.toUpperCase()}
             </div>
             <div>
-              <strong>{profile.full_name}</strong>
+              <strong>{profile.username}</strong>
 
               {profile.semester !== null && (
                 <span>{profile.semester} semestr</span>

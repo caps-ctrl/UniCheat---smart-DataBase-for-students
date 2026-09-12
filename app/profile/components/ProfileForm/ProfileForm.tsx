@@ -9,7 +9,7 @@ import {
   ExternalLink,
   GraduationCap,
   Lock,
-  Mail,
+
   MapPin,
   Settings2,
   ShieldCheck,
@@ -18,32 +18,9 @@ import {
 import styles from "../../profile.module.css";
 import type { ReactNode, SubmitEventHandler } from "react";
 import { FormActions } from "../shared/FormActions";
-import type { ProfileData } from "../../types";
-import Image from "next/image";
+import type { ProfileFormType } from "../../types";
 
-function InfoTile({
-  icon,
-  label,
-  value,
-}: {
-  icon: ReactNode;
-  label: string;
-  value?: ReactNode;
-}) {
-  return (
-    <div className="group rounded-2xl border border-slate-200/80 bg-white/80 p-4 transition duration-200 hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-[0_12px_28px_-18px_rgba(5,150,105,0.45)]">
-      <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 transition-colors group-hover:bg-emerald-100">
-        {icon}
-      </div>
-      <span className="block text-[11px] font-bold tracking-[0.08em] text-slate-400 uppercase">
-        {label}
-      </span>
-      <strong className="mt-1.5 block text-sm leading-6 font-semibold text-slate-700">
-        {value || "Nie uzupełniono"}
-      </strong>
-    </div>
-  );
-}
+import Image from "next/image";
 
 function SocialLink({
   href,
@@ -104,13 +81,13 @@ export function ProfileForm({
   onCancel,
   onSubmit,
 }: {
-  profile: ProfileData;
+  profile: ProfileFormType;
   isEditing: boolean;
   onEdit: () => void;
   onCancel: () => void;
   onSubmit: SubmitEventHandler<HTMLFormElement>;
 }) {
-  const initials = profile.full_name
+  const initials = profile.username
     ?.trim()
     .split(/\s+/)
     .slice(0, 2)
@@ -142,7 +119,7 @@ export function ProfileForm({
           {initials.toUpperCase()}
         </div>
         <div>
-          <h2 className="text-2xl font-bold">{profile.full_name}</h2>
+          <h2 className="text-2xl font-bold">{profile.username}</h2>
           <p>
             {isEditing
               ? "PNG lub JPG, maksymalnie 5 MB."
@@ -209,7 +186,7 @@ export function ProfileForm({
                   autoComplete="family-name"
                 />
               </label>
-              <label className={`${styles.field} sm:col-span-2`}>
+              {/* <label className={`${styles.field} sm:col-span-2`}>
                 <span>Adres e-mail</span>
                 <div className={styles.inputWithIcon}>
                   <Mail size={17} aria-hidden="true" />
@@ -221,14 +198,14 @@ export function ProfileForm({
                   />
                 </div>
                 <small>Adres został zweryfikowany.</small>
-              </label>
+              </label>*/}
               <label className={`${styles.field} sm:col-span-2`}>
                 <span>O mnie</span>
                 <textarea
                   name="bio"
                   rows={4}
                   maxLength={240}
-                  defaultValue={profile.bio}
+                  defaultValue={profile.bio ?? ""}
                 />
                 <small>Maksymalnie 240 znaków.</small>
               </label>
@@ -267,7 +244,7 @@ export function ProfileForm({
                   <input
                     name="githubUrl"
                     type="url"
-                    defaultValue={profile.githubUrl}
+                    defaultValue={profile.github_url ?? ""}
                     placeholder="https://github.com/uzytkownik"
                   />
                 </div>
@@ -279,7 +256,7 @@ export function ProfileForm({
                   <input
                     name="linkedinUrl"
                     type="url"
-                    defaultValue={profile.linkedinUrl}
+                    defaultValue={profile.linkedin_url ?? ""}
                     placeholder="https://linkedin.com/in/uzytkownik"
                   />
                 </div>
@@ -310,10 +287,7 @@ export function ProfileForm({
                     <GraduationCap size={15} aria-hidden="true" />
                     Edycja uczelni
                   </span>
-                  <span className="inline-flex items-center gap-2 text-xs font-semibold text-emerald-100">
-                    <MapPin size={14} aria-hidden="true" />
-                    {profile.city || "Miasto nieuzupełnione"}
-                  </span>
+
                 </div>
                 <p className="mb-2 text-[11px] font-bold tracking-[0.16em] text-emerald-200 uppercase">
                   Twoja uczelnia
@@ -329,7 +303,7 @@ export function ProfileForm({
                   <span className="!text-emerald-100">Kierunek</span>
                   <select
                     name="course"
-                    defaultValue={profile.course}
+                    defaultValue={profile.course_id ?? 1}
                     className="!border-white/15 !bg-white/95"
                   >
                     <option value="Informatyka">Informatyka</option>
@@ -344,7 +318,7 @@ export function ProfileForm({
                   <span className="!text-emerald-100">Semestr</span>
                   <select
                     name="semester"
-                    defaultValue={profile.semester}
+                    defaultValue={profile.semester ?? 0}
                     className="!border-white/15 !bg-white/95"
                   >
                     {Array.from({ length: 7 }, (_, index) => (
@@ -358,7 +332,7 @@ export function ProfileForm({
                   <span className="!text-emerald-100">Wydział</span>
                   <select
                     name="faculty"
-                    defaultValue={profile.faculty}
+                    defaultValue={profile.faculty_id ?? 0}
                     className="!border-white/15 !bg-white/95"
                   >
                     <option>Wydział Informatyki</option>
@@ -381,7 +355,7 @@ export function ProfileForm({
                     className={styles.switch}
                     name="isPrivate"
                     type="checkbox"
-                    defaultChecked={profile.isPrivate}
+                    defaultChecked={profile.is_profile_public}
                     aria-label="Ustaw profil jako prywatny"
                   />
                 </label>
@@ -413,6 +387,26 @@ export function ProfileForm({
               </span>
             </div>
 
+            <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="group rounded-2xl border border-slate-200/80 bg-white/80 p-4 transition duration-200 hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-[0_12px_28px_-18px_rgba(5,150,105,0.45)] sm:p-5">
+                <h3 className="text-[11px] font-bold tracking-[0.08em] text-slate-400 uppercase">
+                  Imię
+                </h3>
+                <p className="mt-1.5 text-sm leading-6 font-semibold text-slate-700">
+                  {firstName || "Nie uzupełniono"}
+                </p>
+              </div>
+
+              <div className="group rounded-2xl border border-slate-200/80 bg-white/80 p-4 transition duration-200 hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-[0_12px_28px_-18px_rgba(5,150,105,0.45)] sm:p-5">
+                <h3 className="text-[11px] font-bold tracking-[0.08em] text-slate-400 uppercase">
+                  Nazwisko
+                </h3>
+                <p className="mt-1.5 text-sm leading-6 font-semibold text-slate-700">
+                  {lastName || "Nie uzupełniono"}
+                </p>
+              </div>
+            </div>
+
             <div className="mb-4 rounded-2xl border border-slate-200/80 bg-white/80 p-4 sm:p-5">
               <span className="mb-2 block text-[11px] font-bold tracking-[0.08em] text-slate-400 uppercase">
                 O mnie
@@ -424,16 +418,7 @@ export function ProfileForm({
             </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <InfoTile
-                icon={<Mail size={17} aria-hidden="true" />}
-                label="Adres e-mail"
-                value={profile.email}
-              />
-              <InfoTile
-                icon={<MapPin size={17} aria-hidden="true" />}
-                label="Miasto"
-                value={profile.city}
-              />
+
             </div>
           </section>
 
@@ -476,12 +461,12 @@ export function ProfileForm({
 
             <div className="grid gap-3">
               <SocialLink
-                href={profile.githubUrl}
+                href={profile.github_url ?? ""}
                 icon={<Code2 size={18} aria-hidden="true" />}
                 label="GitHub"
               />
               <SocialLink
-                href={profile.linkedinUrl}
+                href={profile.linkedin_url ?? ""}
                 icon={<BriefcaseBusiness size={18} aria-hidden="true" />}
                 label="LinkedIn"
               />
@@ -519,12 +504,12 @@ export function ProfileForm({
                   </span>
 
                   <span className="inline-flex w-fit items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-xs font-bold text-emerald-50 backdrop-blur-sm">
-                    {profile.isPrivate ? (
+                    {profile.is_profile_public === false ? (
                       <Lock size={14} aria-hidden="true" />
                     ) : (
                       <ShieldCheck size={14} aria-hidden="true" />
                     )}
-                    {profile.isPrivate ? "Profil prywatny" : "Profil publiczny"}
+                    {profile.is_profile_public === false ? "Profil prywatny" : "Profil publiczny"}
                   </span>
                 </div>
 
@@ -548,7 +533,7 @@ export function ProfileForm({
                     Kierunek
                   </span>
                   <strong className="mt-1.5 block text-sm leading-6 font-semibold text-white">
-                    {profile.course || "Nie uzupełniono"}
+                    {profile.course_id ? `Kierunek ${profile.course_id}` : "Nie uzupełniono"}
                   </strong>
                 </div>
                 <div className="border-b border-white/10 p-4 sm:p-5">
@@ -576,7 +561,7 @@ export function ProfileForm({
                     Wydział
                   </span>
                   <strong className="mt-1.5 block text-sm leading-6 font-semibold text-white">
-                    {profile.faculty || "Nie uzupełniono"}
+                    {profile.faculty_id ? `Wydział ${profile.faculty_id}` : "Nie uzupełniono"}
                   </strong>
                 </div>
                 <div className="p-4 sm:p-5">
@@ -585,12 +570,7 @@ export function ProfileForm({
                     className="mb-3 text-emerald-300"
                     aria-hidden="true"
                   />
-                  <span className="block text-[10px] font-bold tracking-[0.12em] text-emerald-200/80 uppercase">
-                    Miasto
-                  </span>
-                  <strong className="mt-1.5 block text-sm leading-6 font-semibold text-white">
-                    {profile.city || "Nie uzupełniono"}
-                  </strong>
+
                 </div>
               </div>
             </div>

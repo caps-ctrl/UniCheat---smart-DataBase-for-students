@@ -11,6 +11,10 @@ import {
 } from "lucide-react";
 import styles from "../../materials.module.css";
 
+
+
+
+
 type SemesterListProps = {
   faculty: string;
   course: string;
@@ -81,6 +85,10 @@ const semesters = [
     progress: 100,
   },
 ];
+
+
+
+
 
 function SemesterArtwork({ kind }: { kind: string }) {
   if (kind === "start") {
@@ -164,7 +172,12 @@ function SemesterArtwork({ kind }: { kind: string }) {
   );
 }
 
-export default function SemesterList({ faculty, course }: SemesterListProps) {
+export default async function SemesterList({ faculty, course }: SemesterListProps) {
+
+
+
+
+
   return (
     <section
       className={styles.semesterList}

@@ -1,25 +1,47 @@
 import { ReactNode } from "react";
 
 export type Section = "profile" | "notifications" | "security";
+import type { Database } from "@/lib/database.types";
 
-export type ProfileData = {
-  avatar_url: string;
-  city?: string;
-  university?: string;
-  username: string;
-  full_name: string;
-  email: string;
-  course?: string;
-  semester?: string;
-  faculty?: string;
-  interests?: string[];
-  githubUrl?: string;
-  linkedinUrl?: string;
-  bio?: string;
-  isPrivate?: boolean;
-};
+
+export type ProfileRow =
+  Database["public"]["Tables"]["profiles"]["Row"];
+
+
+export type ProfileFormType = Pick<ProfileRow,
+
+  | "full_name"
+
+  | "username"
+
+  | "course_id"
+
+  | "semester"
+
+  | "faculty_id"
+
+  | "interests"
+
+  | "avatar_url"
+
+  | "github_url"
+
+  | "linkedin_url"
+
+  | "bio"
+
+  | "is_profile_public"
+
+  | "university"
+
+>;
+
 
 export type ProfileSettingsProps = {
   navigationBar: ReactNode;
-  data: ProfileData;
+  data: ProfileFormType;
 };
+
+
+
+
