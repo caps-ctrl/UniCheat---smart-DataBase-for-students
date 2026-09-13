@@ -21,6 +21,7 @@ export const getSemesterData = cache(
             faculties!inner(slug)
           ),
           subjects(
+            id,
             name,
             slug,
             theme,

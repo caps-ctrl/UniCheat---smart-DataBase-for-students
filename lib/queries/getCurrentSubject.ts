@@ -14,6 +14,7 @@ export const getCurrentSubject = cache(
       .from("subjects")
       .select(
         `
+          id,
           name,
           slug,
           theme,
@@ -44,6 +45,7 @@ export const getCurrentSubject = cache(
     return {
       semester: { number: data.semesters.number },
       subject: {
+        id: data.id,
         name: data.name,
         slug: data.slug,
         theme: data.theme,

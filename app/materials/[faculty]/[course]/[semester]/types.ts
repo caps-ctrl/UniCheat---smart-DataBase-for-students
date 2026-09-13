@@ -8,6 +8,7 @@ type SubjectChannel = {
 };
 
 export type Subject = {
+  id: number;
   name: string;
   slug: string;
   subject_channels: SubjectChannel[];

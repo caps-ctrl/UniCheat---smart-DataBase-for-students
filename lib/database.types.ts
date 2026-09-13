@@ -70,6 +70,47 @@ export type Database = {
         }
         Relationships: []
       }
+      materials: {
+        Row: {
+          channel_type: Database["public"]["Enums"]["channel_type"]
+          created_at: string | null
+          file_name: string
+          file_path: string
+          id: number
+          subject_id: number
+          title: string
+          uploaded_by: string
+        }
+        Insert: {
+          channel_type: Database["public"]["Enums"]["channel_type"]
+          created_at?: string | null
+          file_name: string
+          file_path: string
+          id?: never
+          subject_id: number
+          title: string
+          uploaded_by: string
+        }
+        Update: {
+          channel_type?: Database["public"]["Enums"]["channel_type"]
+          created_at?: string | null
+          file_name?: string
+          file_path?: string
+          id?: never
+          subject_id?: number
+          title?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "materials_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null

@@ -339,19 +339,128 @@
   line-height: 1.6;
 }
 
-.emptyMaterials button {
+.uploadForm {
+  display: grid;
+  width: min(100%, 440px);
+  gap: 10px;
+  margin-top: 22px;
+  text-align: left;
+}
+
+.uploadField {
+  display: grid;
+  gap: 6px;
+}
+
+.uploadField > span,
+.fileField > span {
+  color: #475569;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.uploadField input {
+  width: 100%;
+  min-height: 43px;
+  border: 1px solid #cbdad4;
+  border-radius: 11px;
+  padding: 0 12px;
+  outline: none;
+  background: white;
+  color: #172033;
+  font: inherit;
+  font-size: 11px;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.uploadField input:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgb(16 185 129 / 12%);
+}
+
+.fileField {
+  position: relative;
+  display: flex;
+  min-height: 50px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  overflow: hidden;
+  border: 1px dashed #9cc9b9;
+  border-radius: 11px;
+  background: rgb(255 255 255 / 76%);
+  color: #047857;
+  cursor: pointer;
+}
+
+.fileField input {
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.uploadForm .uploadButton {
   display: inline-flex;
   min-height: 42px;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  margin-top: 21px;
   border: 0;
   border-radius: 11px;
-  padding: 0 14px;
-  background: #e2e8f0;
-  color: #8793a3;
+  padding: 0 16px;
+  background: #047857;
+  color: white;
   font-size: 9px;
   font-weight: 800;
+  cursor: pointer;
+  transition: background 180ms ease, transform 180ms ease;
+}
+
+.uploadForm .uploadButton:hover:not(:disabled) {
+  background: #065f46;
+  transform: translateY(-1px);
+}
+
+.uploadForm .uploadButton:disabled,
+.uploadForm input:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.uploadError,
+.uploadSuccess {
+  margin: 0 !important;
+  border-radius: 9px;
+  padding: 9px 10px;
+  font-size: 9px !important;
+  text-align: center;
+}
+
+.uploadError {
+  background: #fff1f2;
+  color: #be123c !important;
+}
+
+.uploadSuccess {
+  background: #ecfdf5;
+  color: #047857 !important;
+}
+
+.uploadError a {
+  color: inherit;
+  font-weight: 850;
+  text-decoration: underline;
+}
+
+.spinner {
+  animation: spin 800ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .emptyDecoration {

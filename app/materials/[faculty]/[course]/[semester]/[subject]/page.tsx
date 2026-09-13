@@ -16,12 +16,12 @@ import {
   PencilRuler,
   Sigma,
   Sparkles,
-  Upload,
   UsersRound,
 } from "lucide-react";
 import { NavBar } from "@/components/layout/Navbar/NavBar";
 import { getCurrentSubject } from "@/lib/queries/getCurrentSubject";
 import type { ChannelType, Subject } from "../types";
+import { MaterialUploader } from "./MaterialUploader";
 import styles from "./subject.module.css";
 
 
@@ -250,18 +250,20 @@ export default async function SubjectPage({
 
           <div className={styles.contentGrid}>
             <div className={styles.emptyMaterials}>
+
               <span className={styles.emptyIcon} aria-hidden="true">
                 <ActiveChannelIcon size={30} />
               </span>
               <div>
-                <span className={styles.statusBadge}>Katalog jest gotowy</span>
+                <span className={styles.statusBadge}>Katalog jest gotowy ale pusty jak MAGDA MISKOW</span>
                 <h3>{activeDetails.emptyTitle}</h3>
                 <p>{activeDetails.emptyDescription}</p>
               </div>
-              <button type="button" disabled>
-                <Upload size={16} aria-hidden="true" />
-                Dodawanie materiałów wkrótce
-              </button>
+              <MaterialUploader
+                bucketName={process.env.SUPABASE_MATERIALS_BUCKET ?? "materials"}
+                channelType={activeChannel.type}
+                subjectId={data.subject.id}
+              />
               <FileQuestion
                 className={styles.emptyDecoration}
                 size={86}
@@ -280,8 +282,8 @@ export default async function SubjectPage({
                 <div>
                   <h3>Masz przydatne materiały?</h3>
                   <p>
-                    Wkrótce będzie można dodać notatki i pomóc kolejnym
-                    studentom zaliczyć ten przedmiot.
+                    Dodaj notatki i pomóż kolejnym studentom zaliczyć ten
+                    przedmiot.
                   </p>
                 </div>
               </div>
