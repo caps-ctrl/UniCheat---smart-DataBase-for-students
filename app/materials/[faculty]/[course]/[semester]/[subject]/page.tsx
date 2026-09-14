@@ -8,11 +8,14 @@ import {
   BookOpenText,
   CheckCircle2,
   Code2,
+  Download,
   FileQuestion,
+  FileText,
   FlaskConical,
   FolderOpen,
   GraduationCap,
   Lightbulb,
+  LockKeyhole,
   PencilRuler,
   Sigma,
   Sparkles,
@@ -20,10 +23,11 @@ import {
 } from "lucide-react";
 import { NavBar } from "@/components/layout/Navbar/NavBar";
 import { getCurrentSubject } from "@/lib/queries/getCurrentSubject";
+import { getMaterials } from "@/lib/queries/getMaterials";
 import type { ChannelType, Subject } from "../types";
 import { MaterialUploader } from "./MaterialUploader";
 import styles from "./subject.module.css";
-
+import MaterialList from "./MaterialList";
 
 type SubjectPageProps = {
   params: Promise<{
@@ -101,6 +105,16 @@ function getActiveChannel(subject: Subject, channelParam?: string | string[]) {
   );
 }
 
+function formatMaterialDate(date: string | null) {
+  if (!date) return "Data niedostępna";
+
+  return new Intl.DateTimeFormat("pl-PL", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(date));
+}
+
 export async function generateMetadata({
   params,
 }: SubjectPageProps): Promise<Metadata> {
@@ -154,6 +168,10 @@ export default async function SubjectPage({
   const SubjectIcon = subjectIcons[data.subject.icon];
   const ActiveChannelIcon = channelDetails[activeChannel.type].icon;
   const activeDetails = channelDetails[activeChannel.type];
+  const { materials, hasError: materialsError } = await getMaterials(
+    data.subject.id,
+    activeChannel.type,
+  );
 
   return (
     <main className={styles.page}>
@@ -249,26 +267,19 @@ export default async function SubjectPage({
           </header>
 
           <div className={styles.contentGrid}>
-            <div className={styles.emptyMaterials}>
+            <div className={styles.materialsColumn}>
+              {materialsError ? (
+                <div className={styles.materialsError} role="alert">
+                  <FileQuestion size={24} aria-hidden="true" />
+                  <div>
+                    <strong>Nie udało się pobrać materiałów</strong>
+                    <p>Odśwież stronę lub spróbuj ponownie za chwilę.</p>
+                  </div>
+                </div>
+              ) : <MaterialList materials={materials} />}
 
-              <span className={styles.emptyIcon} aria-hidden="true">
-                <ActiveChannelIcon size={30} />
-              </span>
-              <div>
-                <span className={styles.statusBadge}>Katalog jest gotowy ale pusty jak MAGDA MISKOW</span>
-                <h3>{activeDetails.emptyTitle}</h3>
-                <p>{activeDetails.emptyDescription}</p>
-              </div>
-              <MaterialUploader
-                bucketName={process.env.SUPABASE_MATERIALS_BUCKET ?? "materials"}
-                channelType={activeChannel.type}
-                subjectId={data.subject.id}
-              />
-              <FileQuestion
-                className={styles.emptyDecoration}
-                size={86}
-                aria-hidden="true"
-              />
+
+
             </div>
 
             <aside
@@ -287,7 +298,18 @@ export default async function SubjectPage({
                   </p>
                 </div>
               </div>
-
+              <div className={styles.uploadCard}>
+                <div className={styles.uploadCardHeader}>
+                  <span>Dodaj plik</span>
+                  <h3>Udostępnij własny materiał</h3>
+                  <p>Plik trafi do aktualnie wybranej sekcji.</p>
+                </div>
+                <MaterialUploader
+                  bucketName={process.env.SUPABASE_MATERIALS_BUCKET ?? "materials"}
+                  channelType={activeChannel.type}
+                  subjectId={data.subject.id}
+                />
+              </div>
               <div className={styles.safetyCard}>
                 <strong>Warto pamiętać</strong>
                 <p>

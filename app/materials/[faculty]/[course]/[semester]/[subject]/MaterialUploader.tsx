@@ -101,7 +101,7 @@ export function MaterialUploader({
       }
 
       const storedFileName = safeFileName(file.name);
-      const filePath = `${user.id}/${subjectId}/${crypto.randomUUID()}-${storedFileName}`;
+      const filePath = `materials/subjects/${subjectId}/${crypto.randomUUID()}-${storedFileName}`;
       const { error: uploadError } = await supabase.storage
         .from(bucketName)
         .upload(filePath, file, {

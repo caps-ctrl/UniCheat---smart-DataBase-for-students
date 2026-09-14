@@ -10,13 +10,10 @@ export default function Home() {
   return (
     <main className="site-shell">
       <NavBar />
-
       <HeroSection />
-
       <WhyUsSection />
       <HowItWorksSection />
       <AboutUsSection />
-
       <QuestionsSection />
     </main>
   );
