@@ -10,6 +10,7 @@ type MaterialRow = Pick<
 
 export type MaterialFile = MaterialRow & {
   downloadUrl: string | null;
+  previewUrl: string | null;
 };
 
 export type MaterialsResult = {
@@ -61,13 +62,18 @@ export async function getMaterials(
     const signedUrl = signedUrlByPath.get(material.file_path);
 
     if (!signedUrl) {
-      return { ...material, downloadUrl: null };
+      return { ...material, downloadUrl: null, previewUrl: null };
     }
 
+    const previewUrl = signedUrl;
     const downloadUrl = new URL(signedUrl);
     downloadUrl.searchParams.set("download", material.file_name);
 
-    return { ...material, downloadUrl: downloadUrl.toString() };
+    return {
+      ...material,
+      downloadUrl: downloadUrl.toString(),
+      previewUrl,
+    };
   });
 
   return { materials, hasError: false };

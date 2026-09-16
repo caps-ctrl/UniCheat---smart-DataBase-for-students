@@ -70,36 +70,78 @@ export type Database = {
         }
         Relationships: []
       }
+      material_reports: {
+        Row: {
+          created_at: string
+          id: number
+          material_id: number
+          reason: string
+          reported_by: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: never
+          material_id: number
+          reason: string
+          reported_by: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: never
+          material_id?: number
+          reason?: string
+          reported_by?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_reports_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_reports_reported_by_fkey"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       materials: {
         Row: {
           channel_type: Database["public"]["Enums"]["channel_type"]
-          created_at: string | null
+          created_at: string
           file_name: string
           file_path: string
           id: number
           subject_id: number
           title: string
-          uploaded_by: string
+          uploaded_by: string | null
         }
         Insert: {
           channel_type: Database["public"]["Enums"]["channel_type"]
-          created_at?: string | null
+          created_at?: string
           file_name: string
           file_path: string
-          id?: never
+          id?: number
           subject_id: number
           title: string
-          uploaded_by: string
+          uploaded_by?: string | null
         }
         Update: {
           channel_type?: Database["public"]["Enums"]["channel_type"]
-          created_at?: string | null
+          created_at?: string
           file_name?: string
           file_path?: string
-          id?: never
+          id?: number
           subject_id?: number
           title?: string
-          uploaded_by?: string
+          uploaded_by?: string | null
         }
         Relationships: [
           {
@@ -107,6 +149,13 @@ export type Database = {
             columns: ["subject_id"]
             isOneToOne: false
             referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "materials_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
