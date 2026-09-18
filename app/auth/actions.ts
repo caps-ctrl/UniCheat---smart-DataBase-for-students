@@ -1,5 +1,5 @@
 "use server";
-
+import { authRateLimit } from "@/lib/redis/rateLimit";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";

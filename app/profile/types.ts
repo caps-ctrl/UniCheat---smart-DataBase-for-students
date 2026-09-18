@@ -40,8 +40,19 @@ export type ProfileFormType = Pick<ProfileRow,
 export type ProfileSettingsProps = {
   navigationBar: ReactNode;
   data: ProfileFormType;
+  faculties: ProfileFacultyOption[];
+  courses: ProfileCourseOption[];
 };
 
+export type ProfileFacultyOption = Pick<
+  Database["public"]["Tables"]["faculties"]["Row"],
+  "id" | "name"
+>;
+
+export type ProfileCourseOption = Pick<
+  Database["public"]["Tables"]["courses"]["Row"],
+  "id" | "name" | "faculty_id"
+>;
 
 
 

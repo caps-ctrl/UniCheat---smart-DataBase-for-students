@@ -1,5 +1,6 @@
 "use server";
 
+import { uploadRateLimit } from "@/lib/redis/rateLimit";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
@@ -9,7 +10,7 @@ const channelTypes = ["lecture", "lab", "exercises"] as const;
 const materialSchema = z.object({
   subjectId: z.number().int().positive(),
   channelType: z.enum(channelTypes),
-  title: z.string().trim().min(3).max(120),
+  title: z.string().trim().min(3).max(100),
   filePath: z.string().min(1).max(500),
   fileName: z.string().min(1).max(255),
   pagePath: z.string().startsWith("/materials/").max(700),
@@ -55,6 +56,15 @@ export async function addMaterial(
     return {
       success: false,
       message: "Zaloguj się, aby dodać materiał.",
+    };
+  }
+
+  const { success } = await uploadRateLimit.limit(user.id);
+
+  if (!success) {
+    return {
+      success: false,
+      message: "Osiągnięto limit przesyłania materiałów. Spróbuj ponownie za kilka minut.",
     };
   }
 

@@ -3,11 +3,17 @@
 import { ProfileForm } from "./components/ProfileForm/ProfileForm";
 import { NotificationsForm } from "./components/NotificationsForm/NotificationForm";
 import { SecurityForm } from "./components/SecurityForm/SecurityForm";
-import { BookOpen, Check, ChevronRight } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { AlertCircle, BookOpen, Check, ChevronRight } from "lucide-react";
+import { type FormEvent, useActionState, useState } from "react";
+import { useRouter } from "next/navigation";
 import styles from "./profile.module.css";
 import { navigation } from "@/data/profile/sideBarData";
-import type { Section, ProfileSettingsProps, ProfileFormType } from "./types";
+import type { Section, ProfileSettingsProps } from "./types";
+import {
+
+  updateProfile,
+  type UpdateProfileState,
+} from "./actions";
 
 
 
@@ -17,44 +23,39 @@ import type { Section, ProfileSettingsProps, ProfileFormType } from "./types";
 export default function ProfileSettings({
   navigationBar,
   data,
+  faculties,
+  courses,
 }: ProfileSettingsProps) {
+  const router = useRouter();
   const [section, setSection] = useState<Section>("profile");
-  const [saved, setSaved] = useState(false);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
-  const [profile, setProfile] = useState<ProfileFormType>(data);
+  const [toast, setToast] = useState<UpdateProfileState | null>(null);
+  const initialProfileState: UpdateProfileState = {
+    status: "idle",
+    message: "",
+  };
+  const [, profileAction, isProfilePending] = useActionState(
+    async (previousState: UpdateProfileState, formData: FormData) => {
+      const result = await updateProfile(previousState, formData);
+
+      if (result.status === "success") {
+        setIsEditingProfile(false);
+        router.refresh();
+      }
+
+      setToast(result);
+      window.setTimeout(() => setToast(null), 2800);
+
+      return result;
+    },
+    initialProfileState,
+  );
+  const profile = data;
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSaved(true);
-    window.setTimeout(() => setSaved(false), 2400);
-  }
-
-  function handleProfileSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-
-    setProfile({
-      full_name: String(formData.get("firstName") ?? ""),
-      username: String(formData.get("username") ?? ""),
-      university: String(formData.get("university") ?? ""),
-      course_id: Number(formData.get("course") ?? null),
-      semester: Number(formData.get("semester") ?? null),
-      faculty_id: Number(formData.get("faculty") ?? null),
-      interests: String(formData.get("interests") ?? "")
-        .split(",")
-        .map((interest) => interest.trim())
-        .filter(Boolean),
-
-      avatar_url: String(formData.get("avatarUrl") ?? ""),
-
-      github_url: String(formData.get("githubUrl") ?? ""),
-      linkedin_url: String(formData.get("linkedinUrl") ?? ""),
-      bio: String(formData.get("bio") ?? ""),
-      is_profile_public: formData.get("isPrivate") === "on",
-    });
-    setIsEditingProfile(false);
-    setSaved(true);
-    window.setTimeout(() => setSaved(false), 2400);
+    setToast({ status: "success", message: "Zmiany zostały zapisane." });
+    window.setTimeout(() => setToast(null), 2400);
   }
 
   const initials = profile.username
@@ -139,10 +140,13 @@ export default function ProfileSettings({
             {section === "profile" && (
               <ProfileForm
                 profile={profile}
+                faculties={faculties}
+                courses={courses}
                 isEditing={isEditingProfile}
+                isPending={isProfilePending}
                 onEdit={() => setIsEditingProfile(true)}
                 onCancel={() => setIsEditingProfile(false)}
-                onSubmit={handleProfileSubmit}
+                action={profileAction}
               />
             )}
             {section === "notifications" && (
@@ -154,11 +158,15 @@ export default function ProfileSettings({
       </div>
 
       <div
-        className={`${styles.toast} ${saved ? styles.toastVisible : ""}`}
-        role="status"
+        className={`${styles.toast} ${toast ? styles.toastVisible : ""} ${toast?.status === "error" ? styles.toastError : ""}`}
+        role={toast?.status === "error" ? "alert" : "status"}
       >
-        <Check size={18} aria-hidden="true" />
-        Zmiany zostały zapisane
+        {toast?.status === "error" ? (
+          <AlertCircle size={18} aria-hidden="true" />
+        ) : (
+          <Check size={18} aria-hidden="true" />
+        )}
+        {toast?.message ?? "Zmiany zostały zapisane."}
       </div>
     </main>
   );

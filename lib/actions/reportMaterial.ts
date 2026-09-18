@@ -1,20 +1,38 @@
 "use server";
 
+
+import { reportRateLimit } from "../redis/rateLimit";
+import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+
+const reportMaterialSchema = z.object({
+    materialId: z
+        .number()
+        .int("Nieprawidłowy materiał")
+        .positive("Nieprawidłowy materiał"),
+    reason: z
+        .string()
+        .trim()
+        .min(3, "Powód zgłoszenia musi mieć co najmniej 3 znaki")
+        .max(200, "Powód zgłoszenia może mieć maksymalnie 200 znaków"),
+});
 
 export async function reportMaterial(
     materialId: number,
     reason: string
 ) {
-    const normalizedReason = reason.trim();
 
-    if (!Number.isInteger(materialId) || materialId <= 0) {
-        throw new Error("Nieprawidłowy materiał");
+
+    const parsed = reportMaterialSchema.safeParse({ materialId, reason });
+
+    if (!parsed.success) {
+        throw new Error(
+            parsed.error.issues[0]?.message ?? "Nieprawidłowe dane zgłoszenia"
+        );
     }
 
-    if (normalizedReason.length < 3 || normalizedReason.length > 500) {
-        throw new Error("Powód zgłoszenia musi mieć od 3 do 500 znaków");
-    }
+    const { materialId: validatedMaterialId, reason: normalizedReason } =
+        parsed.data;
 
     const supabase = await createClient();
 
@@ -26,10 +44,17 @@ export async function reportMaterial(
         throw new Error("Musisz być zalogowany");
     }
 
+    const { success } = await reportRateLimit.limit(user.id)
+
+    if (!success) {
+        throw new Error(
+            "Osiągnięto limit zgłoszeń. Spróbuj ponownie za kilka minut."
+        );
+    }
     const { error } = await supabase
         .from("material_reports")
         .insert({
-            material_id: materialId,
+            material_id: validatedMaterialId,
             reported_by: user.id,
             reason: normalizedReason,
         });

@@ -16,9 +16,13 @@ import {
   UserRound,
 } from "lucide-react";
 import styles from "../../profile.module.css";
-import type { ReactNode, SubmitEventHandler } from "react";
+import type { ReactNode } from "react";
 import { FormActions } from "../shared/FormActions";
-import type { ProfileFormType } from "../../types";
+import type {
+  ProfileCourseOption,
+  ProfileFacultyOption,
+  ProfileFormType,
+} from "../../types";
 
 import Image from "next/image";
 
@@ -76,16 +80,22 @@ function SocialLink({
 
 export function ProfileForm({
   profile,
+  faculties,
+  courses,
   isEditing,
+  isPending,
   onEdit,
   onCancel,
-  onSubmit,
+  action,
 }: {
   profile: ProfileFormType;
+  faculties: ProfileFacultyOption[];
+  courses: ProfileCourseOption[];
   isEditing: boolean;
+  isPending: boolean;
   onEdit: () => void;
   onCancel: () => void;
-  onSubmit: SubmitEventHandler<HTMLFormElement>;
+  action: (formData: FormData) => void;
 }) {
   const initials = profile.username
     ?.trim()
@@ -99,7 +109,7 @@ export function ProfileForm({
   const lastName = lastNameParts.join(" ");
 
   return (
-    <form onSubmit={onSubmit}>
+    <form action={action} aria-busy={isPending}>
       <div className={styles.headingWithAction}>
         <SectionHeading
           icon={Settings2}
@@ -141,13 +151,6 @@ export function ProfileForm({
 
       {isEditing ? (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-          <input type="hidden" name="username" value={profile.username} />
-          <input
-            type="hidden"
-            name="avatarUrl"
-            value={profile.avatar_url ?? ""}
-          />
-
           <section className="rounded-3xl border border-slate-200 bg-[linear-gradient(145deg,#ffffff_0%,#f8fafc_100%)] p-5 shadow-[0_18px_45px_-34px_rgba(15,23,42,0.35)] sm:p-6 lg:col-span-7">
             <div className="mb-5 flex flex-col items-start justify-between gap-4 sm:flex-row">
               <div className="flex items-center gap-3">
@@ -300,27 +303,39 @@ export function ProfileForm({
 
               <div className="grid grid-cols-1 gap-4 rounded-3xl border border-white/12 bg-slate-950/20 p-4 backdrop-blur-md sm:grid-cols-2 sm:p-5">
                 <label className={styles.field}>
+                  <span className="!text-emerald-100">Uczelnia</span>
+                  <input
+                    name="university"
+                    defaultValue={profile.university ?? ""}
+                    className="!border-white/15 !bg-white/95 !text-slate-900"
+                    required
+                  />
+                </label>
+                <label className={styles.field}>
                   <span className="!text-emerald-100">Kierunek</span>
                   <select
                     name="course"
-                    defaultValue={profile.course_id ?? 1}
+                    defaultValue={profile.course_id ?? ""}
                     className="!border-white/15 !bg-white/95"
+                    required
                   >
-                    <option value="Informatyka">Informatyka</option>
-                    <option value="Automatyka i robotyka">
-                      Automatyka i robotyka
-                    </option>
-                    <option value="Budownictwo">Budownictwo</option>
-                    <option value="Zarządzanie">Zarządzanie</option>
+                    <option value="" disabled>Wybierz kierunek</option>
+                    {courses.map((course) => (
+                      <option key={course.id} value={course.id}>
+                        {course.name}
+                      </option>
+                    ))}
                   </select>
                 </label>
                 <label className={styles.field}>
                   <span className="!text-emerald-100">Semestr</span>
                   <select
                     name="semester"
-                    defaultValue={profile.semester ?? 0}
+                    defaultValue={profile.semester ?? ""}
                     className="!border-white/15 !bg-white/95"
+                    required
                   >
+                    <option value="" disabled>Wybierz semestr</option>
                     {Array.from({ length: 7 }, (_, index) => (
                       <option key={index + 1} value={index + 1}>
                         {index + 1} semestr
@@ -332,10 +347,16 @@ export function ProfileForm({
                   <span className="!text-emerald-100">Wydział</span>
                   <select
                     name="faculty"
-                    defaultValue={profile.faculty_id ?? 0}
+                    defaultValue={profile.faculty_id ?? ""}
                     className="!border-white/15 !bg-white/95"
+                    required
                   >
-                    <option>Wydział Informatyki</option>
+                    <option value="" disabled>Wybierz wydział</option>
+                    {faculties.map((faculty) => (
+                      <option key={faculty.id} value={faculty.id}>
+                        {faculty.name}
+                      </option>
+                    ))}
                   </select>
                 </label>
                 <label
@@ -355,7 +376,7 @@ export function ProfileForm({
                     className={styles.switch}
                     name="isPrivate"
                     type="checkbox"
-                    defaultChecked={profile.is_profile_public}
+                    defaultChecked={!profile.is_profile_public}
                     aria-label="Ustaw profil jako prywatny"
                   />
                 </label>
@@ -578,7 +599,9 @@ export function ProfileForm({
         </div>
       )}
 
-      {isEditing && <FormActions onCancel={onCancel} />}
+      {isEditing && (
+        <FormActions onCancel={onCancel} isPending={isPending} />
+      )}
     </form>
   );
 }

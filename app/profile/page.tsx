@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 
 import { NavBar } from "@/components/layout/Navbar/NavBar";
 import ProfileSettings from "./ProfileSettings";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/queries/getCurrentProfile";
+import { getProfileFormOptions } from "@/lib/queries/getProfileFormOptions";
 
 export const metadata: Metadata = {
   title: "Profil użytkownika | uniCheat",
@@ -11,26 +12,25 @@ export const metadata: Metadata = {
 };
 
 export default async function ProfilePage() {
-  const supabase = await createClient();
+  const [profile, options] = await Promise.all([
+    getCurrentProfile(),
+    getProfileFormOptions(),
+  ]);
 
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) {
+  if (!profile) {
     return <p>Uzytkownik nie jest zalogowany</p>;
   }
 
-  const { data, error: profileError } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user?.id)
-    .single();
-  if (profileError) {
-    console.error("Błąd pobierania profilu:", profileError);
+  if (!options) {
     return <p>Wystąpił błąd podczas pobierania profilu.</p>;
   }
 
-  return <ProfileSettings data={data} navigationBar={<NavBar />} />;
+  return (
+    <ProfileSettings
+      data={profile}
+      faculties={options.faculties}
+      courses={options.courses}
+      navigationBar={<NavBar />}
+    />
+  );
 }

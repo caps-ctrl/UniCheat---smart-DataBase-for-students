@@ -19,8 +19,7 @@ export async function getCurrentProfile() {
     const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select(
-            `faculty_id,
-       course_id,
+            `*,
      faculty:faculties(slug),
       course:courses(slug)`,
         )
