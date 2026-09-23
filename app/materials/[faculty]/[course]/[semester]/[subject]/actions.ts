@@ -70,7 +70,7 @@ export async function addMaterial(
 
   const { subjectId, channelType, title, filePath, fileName, pagePath } =
     parsed.data;
-  const expectedPrefix = `materials/subjects/${subjectId}`;
+  const expectedPrefix = `materials/subjects/${subjectId}/`;
 
   if (!filePath.startsWith(expectedPrefix) || filePath.includes("..")) {
     return { success: false, message: "Nieprawidłowa ścieżka pliku." };

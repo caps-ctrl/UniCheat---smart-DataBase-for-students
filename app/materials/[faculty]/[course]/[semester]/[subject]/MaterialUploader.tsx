@@ -102,6 +102,18 @@ export function MaterialUploader({
 
       const storedFileName = safeFileName(file.name);
       const filePath = `materials/subjects/${subjectId}/${crypto.randomUUID()}-${storedFileName}`;
+
+
+      const actionResult = await addMaterial({
+        subjectId,
+        channelType,
+        title,
+        filePath,
+        fileName: file.name.slice(0, 255),
+        pagePath: window.location.pathname,
+      });
+
+
       const { error: uploadError } = await supabase.storage
         .from(bucketName)
         .upload(filePath, file, {
@@ -118,14 +130,6 @@ export function MaterialUploader({
         return;
       }
 
-      const actionResult = await addMaterial({
-        subjectId,
-        channelType,
-        title,
-        filePath,
-        fileName: file.name.slice(0, 255),
-        pagePath: window.location.pathname,
-      });
 
       setResult(actionResult);
 
