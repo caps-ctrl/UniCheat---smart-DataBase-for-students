@@ -1,7 +1,7 @@
 "use client";
-
+import { Turnstile, type TurnstileInstance } from "@marsidev/react-turnstile";
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { login, register, type AuthState } from "./actions";
 import type { AuthField } from "./schema";
 import styles from "./AuthPage.module.css";
@@ -9,6 +9,11 @@ import styles from "./AuthPage.module.css";
 type AuthPageProps = {
   mode: "login" | "register";
 };
+
+const persistedFields = {
+  login: ["email", "rememberMe"],
+  register: ["userName", "firstName", "lastName", "email", "terms"],
+} as const;
 
 function FieldError({
   errors,
@@ -37,10 +42,76 @@ function FieldError({
 export default function AuthPage({ mode }: AuthPageProps) {
   const isLogin = mode === "login";
   const action = isLogin ? login : register;
+  const formRef = useRef<HTMLFormElement>(null);
+  const turnstileRef = useRef<TurnstileInstance>(null);
   const [state, formAction, isPending] = useActionState<AuthState, FormData>(
     action,
     {},
   );
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+
+
+  useEffect(() => {
+    turnstileRef.current?.reset();
+  }, [state]);
+
+
+
+
+
+  useEffect(() => {
+    let savedDraft: string | null;
+
+    try {
+      savedDraft = sessionStorage.getItem(`auth-form:${mode}`);
+    } catch {
+      return;
+    }
+
+    if (!savedDraft || !formRef.current) {
+      return;
+    }
+
+    try {
+      const values = JSON.parse(savedDraft) as Record<string, unknown>;
+
+      for (const fieldName of persistedFields[mode]) {
+        const field = formRef.current.elements.namedItem(fieldName);
+        const value = values[fieldName];
+
+        if (!(field instanceof HTMLInputElement) || typeof value !== "string") {
+          continue;
+        }
+
+        if (field.type === "checkbox") {
+          field.checked = value === "on";
+        } else {
+          field.value = value;
+        }
+      }
+    } catch {
+      return;
+    }
+  }, [mode]);
+
+  function saveDraft(form: HTMLFormElement) {
+
+    const formData = new FormData(form);
+    const values = Object.fromEntries(
+      persistedFields[mode].map((fieldName) => [
+        fieldName,
+        String(formData.get(fieldName) ?? ""),
+      ]),
+    );
+
+    try {
+      sessionStorage.setItem(`auth-form:${mode}`, JSON.stringify(values));
+    } catch {
+      return;
+    }
+
+  }
+
   return (
     <main className={styles.page}>
       <div className={styles.shell}>
@@ -67,7 +138,27 @@ export default function AuthPage({ mode }: AuthPageProps) {
                 : "Zyskaj dostęp do materiałów, opinii i wiedzy tworzonej przez studentów ZUT."}
             </p>
 
-            <form className={styles.form} action={formAction} noValidate>
+            <form
+              ref={formRef}
+              className={styles.form}
+              action={formAction}
+              onChange={(event) => saveDraft(event.currentTarget)}
+              noValidate
+            >
+
+              <div className="m-auto border-black"> <Turnstile
+
+                ref={turnstileRef}
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+
+                onSuccess={(token) => {
+
+                  setCaptchaToken(token);
+
+                }}
+
+
+              />  </div><input type="hidden" name="captchaToken" value={captchaToken || ""} />
               {!isLogin && (
                 <div>
                   <label className={styles.field}>
@@ -228,7 +319,7 @@ export default function AuthPage({ mode }: AuthPageProps) {
               <button
                 className={styles.submit}
                 type="submit"
-                disabled={isPending}
+                disabled={isPending || !captchaToken}
               >
                 {isPending
                   ? "Proszę czekać…"

@@ -1,9 +1,10 @@
 "use server";
-import { authRateLimit } from "@/lib/redis/rateLimit";
+import { authRateLimit } from '@/lib/redis/rateLimit';
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { loginSchema, registerSchema, type AuthFieldErrors } from "./schema";
+import { getClientIp } from "@/lib/utils";
 
 export type AuthState = {
   errors?: AuthFieldErrors;
@@ -40,6 +41,9 @@ function authErrorMessage(message: string) {
   if (normalized.includes("rate limit")) {
     return "Zbyt wiele prób. Odczekaj chwilę i spróbuj ponownie.";
   }
+  if (normalized.includes("23505")) {
+    return "Nazwa uytkownika juz jest zajeta.";
+  }
 
   return "Nie udało się wykonać operacji. Spróbuj ponownie.";
 }
@@ -48,20 +52,37 @@ export async function login(
   _previousState: AuthState,
   formData: FormData,
 ): Promise<AuthState> {
+  const ip = await getClientIp();
+
+  if (ip) {
+    const { success } = await authRateLimit.limit(ip);
+
+    if (!success) {
+      return {
+        message: "Zbyt wiele prób logowania. Odczekaj chwilę i spróbuj ponownie.",
+      };
+    }
+  }
+
+
+
+
   const result = loginSchema.safeParse({
     email: fieldValue(formData, "email"),
     password: fieldValue(formData, "password"),
+    captchaToken: fieldValue(formData, "captchaToken")
   });
 
   if (!result.success) {
     return validationFailure(result.error.flatten().fieldErrors);
   }
+  const { email, password, captchaToken } = result.data
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword(result.data);
+  const { error } = await supabase.auth.signInWithPassword({ email, password, options: { captchaToken } });
 
   if (error) {
-    return { message: authErrorMessage(error.message) };
+    return { message: error.message };
   }
 
   redirect("/profile");
@@ -71,6 +92,20 @@ export async function register(
   _previousState: AuthState,
   formData: FormData,
 ): Promise<AuthState> {
+
+  const ip = await getClientIp();
+  console.log(ip)
+
+  if (ip) {
+    const { success } = await authRateLimit.limit(ip)
+
+    if (!success) {
+      return {
+        message: "Zbyt wiele prób logowania. Odczekaj chwilę i spróbuj ponownie.",
+      };
+    }
+  }
+
   const result = registerSchema.safeParse({
     userName: fieldValue(formData, "userName"),
     firstName: fieldValue(formData, "firstName"),
@@ -79,25 +114,16 @@ export async function register(
     password: fieldValue(formData, "password"),
     passwordConfirmation: fieldValue(formData, "passwordConfirmation"),
     terms: formData.get("terms") === "on",
+    captchaToken: fieldValue(formData, "captchaToken"),
   });
 
   if (!result.success) {
     return validationFailure(result.error.flatten().fieldErrors);
   }
-  const allowedDomain = "zut.edu.pl";
-  const emailDomain = result.data.email.split("@")[1];
 
-  if (emailDomain !== allowedDomain) {
-    return {
-      errors: {
-        email: ["Dozwolone są wyłącznie adresy w domenie @zut.edu.pl."],
-      },
 
-      message: "Popraw zaznaczone pola.",
-    };
-  }
+  const { userName, firstName, lastName, email, password, captchaToken } = result.data;
 
-  const { userName, firstName, lastName, email, password } = result.data;
 
   const requestHeaders = await headers();
   const origin =
@@ -105,6 +131,7 @@ export async function register(
     requestHeaders.get("origin") ??
     "http://localhost:3000";
   const supabase = await createClient();
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -116,11 +143,22 @@ export async function register(
         username: `${userName}`,
       },
       emailRedirectTo: `${origin}/auth/confirm?next=/profile`,
+      captchaToken: captchaToken,
     },
   });
 
   if (error) {
-    return { message: authErrorMessage(error.message) };
+
+
+    console.error(error.message)
+
+
+    return {
+      message: error.message,
+
+    };
+
+
   }
 
   if (data.session) {

@@ -32,6 +32,7 @@ const name = (label: string) =>
 export const loginSchema = z.object({
   email,
   password: z.string().min(1, "Hasło jest wymagane."),
+  captchaToken: z.string().min(1, "Weryfikacja reCAPTCHA jest wymagana")
 });
 
 export const registerSchema = z
@@ -45,6 +46,7 @@ export const registerSchema = z
     terms: z.boolean().refine((accepted) => accepted, {
       message: "Zaakceptuj regulamin i politykę prywatności.",
     }),
+    captchaToken: z.string().min(1, "Weryfikacja reCAPTCHA jest wymagana."),
   })
   .refine(
     ({ password, passwordConfirmation }) => password === passwordConfirmation,
@@ -62,6 +64,7 @@ export const authFieldNames = [
   "password",
   "passwordConfirmation",
   "terms",
+  "captchaToken"
 ] as const;
 
 export type AuthField = (typeof authFieldNames)[number];

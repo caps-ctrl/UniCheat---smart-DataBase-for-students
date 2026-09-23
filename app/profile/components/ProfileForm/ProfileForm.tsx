@@ -173,7 +173,7 @@ export function ProfileForm({
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <label className={styles.field}>
+              <label className={`${styles.field} ${styles.editField}`}>
                 <span>Imię</span>
                 <input
                   name="firstName"
@@ -181,7 +181,7 @@ export function ProfileForm({
                   autoComplete="given-name"
                 />
               </label>
-              <label className={styles.field}>
+              <label className={`${styles.field} ${styles.editField}`}>
                 <span>Nazwisko</span>
                 <input
                   name="lastName"
@@ -202,7 +202,9 @@ export function ProfileForm({
                 </div>
                 <small>Adres został zweryfikowany.</small>
               </label>*/}
-              <label className={`${styles.field} sm:col-span-2`}>
+              <label
+                className={`${styles.field} ${styles.editField} sm:col-span-2`}
+              >
                 <span>O mnie</span>
                 <textarea
                   name="bio"
@@ -231,7 +233,7 @@ export function ProfileForm({
             </div>
 
             <div className="grid gap-4">
-              <label className={styles.field}>
+              <label className={`${styles.field} ${styles.editField}`}>
                 <span>Zainteresowania</span>
                 <input
                   name="interests"
@@ -240,7 +242,7 @@ export function ProfileForm({
                 />
                 <small>Oddziel zainteresowania przecinkami.</small>
               </label>
-              <label className={styles.field}>
+              <label className={`${styles.field} ${styles.editField}`}>
                 <span>GitHub</span>
                 <div className={styles.inputWithIcon}>
                   <Code2 size={17} aria-hidden="true" />
@@ -252,7 +254,7 @@ export function ProfileForm({
                   />
                 </div>
               </label>
-              <label className={styles.field}>
+              <label className={`${styles.field} ${styles.editField}`}>
                 <span>LinkedIn</span>
                 <div className={styles.inputWithIcon}>
                   <BriefcaseBusiness size={17} aria-hidden="true" />
@@ -302,21 +304,23 @@ export function ProfileForm({
               </div>
 
               <div className="grid grid-cols-1 gap-4 rounded-3xl border border-white/12 bg-slate-950/20 p-4 backdrop-blur-md sm:grid-cols-2 sm:p-5">
-                <label className={styles.field}>
+                <label
+                  className={`${styles.field} ${styles.editField} ${styles.universityEditField}`}
+                >
                   <span className="!text-emerald-100">Uczelnia</span>
                   <input
                     name="university"
                     defaultValue={profile.university ?? ""}
-                    className="!border-white/15 !bg-white/95 !text-slate-900"
                     required
                   />
                 </label>
-                <label className={styles.field}>
+                <label
+                  className={`${styles.field} ${styles.editField} ${styles.universityEditField}`}
+                >
                   <span className="!text-emerald-100">Kierunek</span>
                   <select
                     name="course"
                     defaultValue={profile.course_id ?? ""}
-                    className="!border-white/15 !bg-white/95"
                     required
                   >
                     <option value="" disabled>Wybierz kierunek</option>
@@ -327,12 +331,13 @@ export function ProfileForm({
                     ))}
                   </select>
                 </label>
-                <label className={styles.field}>
+                <label
+                  className={`${styles.field} ${styles.editField} ${styles.universityEditField}`}
+                >
                   <span className="!text-emerald-100">Semestr</span>
                   <select
                     name="semester"
                     defaultValue={profile.semester ?? ""}
-                    className="!border-white/15 !bg-white/95"
                     required
                   >
                     <option value="" disabled>Wybierz semestr</option>
@@ -343,12 +348,13 @@ export function ProfileForm({
                     ))}
                   </select>
                 </label>
-                <label className={`${styles.field} sm:col-span-2`}>
+                <label
+                  className={`${styles.field} ${styles.editField} ${styles.universityEditField} sm:col-span-2`}
+                >
                   <span className="!text-emerald-100">Wydział</span>
                   <select
                     name="faculty"
                     defaultValue={profile.faculty_id ?? ""}
-                    className="!border-white/15 !bg-white/95"
                     required
                   >
                     <option value="" disabled>Wybierz wydział</option>
