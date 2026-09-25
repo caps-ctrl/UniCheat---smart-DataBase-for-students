@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "zutLearning | Platforma dla studentów ZUT",
+  title: "uniCheat | Bazy danych studentów",
   description:
-    "Frontend homepage platformy edukacyjnej dla studentów Zachodniopomorskiego Uniwersytetu Technologicznego.",
+    "Frontend homepage platformy edukacyjnej dla studentów.",
 };
 
 export default function RootLayout({

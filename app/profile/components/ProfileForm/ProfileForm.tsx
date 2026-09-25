@@ -269,23 +269,24 @@ export function ProfileForm({
             </div>
           </section>
 
-          <section className="relative mx-auto w-full max-w-[680px] overflow-hidden rounded-[32px] border border-emerald-800/40 bg-[linear-gradient(145deg,#0f172a_0%,#064e3b_55%,#047857_100%)] p-5 text-white shadow-[0_28px_70px_-34px_rgba(4,120,87,0.9)] sm:p-7 lg:col-span-12 lg:min-h-[540px]">
+          <section className="relative mx-auto flex w-full max-w-[680px] flex-col overflow-hidden rounded-[32px] border border-emerald-800/40 bg-[linear-gradient(145deg,#0f172a_0%,#064e3b_55%,#047857_100%)] p-5 text-white shadow-[0_28px_70px_-34px_rgba(4,120,87,0.9)] sm:p-7 lg:col-span-12 lg:min-h-[540px]">
             <div
               className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.08]"
               aria-hidden="true"
             >
               <Image
-                src="/icons/WIZUT.svg"
+                src="/icons/Uni.svg"
                 width={520}
                 height={520}
                 alt=""
+                unoptimized
                 className="h-[82%] w-[82%] object-contain brightness-0 invert"
               />
             </div>
             <div className="pointer-events-none absolute -top-24 -right-16 h-64 w-64 rounded-full bg-emerald-300/10 blur-2xl" />
             <div className="pointer-events-none absolute -bottom-24 left-1/3 h-52 w-52 rounded-full bg-sky-300/10 blur-3xl" />
 
-            <div className="relative z-10 flex h-full flex-col justify-between gap-8">
+            <div className="relative z-10 flex flex-1 flex-col justify-between gap-8">
               <div>
                 <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-[11px] font-bold tracking-[0.12em] text-emerald-100 uppercase backdrop-blur-sm">
@@ -500,16 +501,17 @@ export function ProfileForm({
             </div>
           </section>
 
-          <section className="relative mx-auto w-full  overflow-hidden rounded-[32px] border border-emerald-800/40 bg-[linear-gradient(145deg,#0f172a_0%,#064e3b_55%,#047857_100%)] p-5 text-white shadow-[0_28px_70px_-34px_rgba(4,120,87,0.9)] sm:p-7 lg:col-span-12 lg:aspect-[6/5]">
+          <section className="relative mx-auto flex w-full max-w-[680px] flex-col overflow-hidden rounded-[32px] border border-emerald-800/40 bg-[linear-gradient(145deg,#0f172a_0%,#064e3b_55%,#047857_100%)] p-5 text-white shadow-[0_28px_70px_-34px_rgba(4,120,87,0.9)] sm:p-7 lg:col-span-12 lg:min-h-[540px]">
             <div
               className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-[0.08]"
               aria-hidden="true"
             >
               <Image
-                src="/icons/WIZUT.svg"
+                src="/icons/Uni.svg"
                 width={520}
                 height={520}
                 alt=""
+                unoptimized
                 className="h-[82%] w-[82%] object-contain brightness-0 invert"
               />
             </div>
@@ -522,7 +524,7 @@ export function ProfileForm({
               aria-hidden="true"
             />
 
-            <div className="relative z-10 flex h-full flex-col justify-between gap-8">
+            <div className="relative z-10 flex flex-1 flex-col justify-between gap-8">
               <div>
                 <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-2 text-[11px] font-bold tracking-[0.12em] text-emerald-100 uppercase backdrop-blur-sm">

@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { BookOpenCheck, LogIn } from "lucide-react";
 import { NavBar } from "@/components/layout/Navbar/NavBar";
 import { getCurrentProfile } from "@/lib/queries/getCurrentProfile";
+import { getProfileFormOptions } from "@/lib/queries/getProfileFormOptions";
+import StudySelectionForm from "./StudySelectionForm";
 import styles from "./materials.module.css";
 
 
@@ -18,10 +20,52 @@ export default async function MaterialsPage() {
   const profile = await getCurrentProfile();
 
   if (profile) {
-    const faculty = encodeURIComponent(String(profile.faculty?.slug));
-    const course = encodeURIComponent(String(profile.course?.slug));
-    if (profile?.faculty_id == null || profile.course_id == null) return "TUTAJ DAC LINK DO UZUPELNIENIA PROFILU";
-    redirect(`/materials/${faculty}/${course}`);
+    const facultySlug = profile.faculty?.slug;
+    const courseSlug = profile.course?.slug;
+
+    if (
+      profile.faculty_id !== null &&
+      profile.course_id !== null &&
+      facultySlug &&
+      courseSlug
+    ) {
+      redirect(
+        `/materials/${encodeURIComponent(facultySlug)}/${encodeURIComponent(courseSlug)}`,
+      );
+    }
+
+    const options = await getProfileFormOptions();
+
+    return (
+      <main className={styles.page}>
+        <div className={styles.shell}>
+          <NavBar />
+
+          {options &&
+          options.faculties.length > 0 &&
+          options.courses.length > 0 ? (
+            <StudySelectionForm
+              faculties={options.faculties}
+              courses={options.courses}
+              initialFacultyId={profile.faculty_id}
+              initialCourseId={profile.course_id}
+            />
+          ) : (
+            <section
+              className={styles.accessGate}
+              aria-labelledby="options-error-title"
+            >
+              <span className={styles.accessIcon} aria-hidden="true">
+                <BookOpenCheck size={34} />
+              </span>
+              <p className={styles.eyebrow}>Materiały dla Twojego kierunku</p>
+              <h1 id="options-error-title">Nie udało się pobrać kierunków</h1>
+              <p>Odśwież stronę lub spróbuj ponownie za chwilę.</p>
+            </section>
+          )}
+        </div>
+      </main>
+    );
   }
 
   return (

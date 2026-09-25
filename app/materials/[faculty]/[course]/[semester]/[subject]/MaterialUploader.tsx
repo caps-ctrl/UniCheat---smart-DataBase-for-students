@@ -17,36 +17,10 @@ type MaterialUploaderProps = {
   subjectId: number;
 };
 
-function safeFileName(fileName: string) {
-  const normalized = fileName
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-zA-Z0-9._-]+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
 
-  return normalized.slice(-160) || "material";
-}
-
-function storageErrorMessage(message: string) {
-  const normalized = message.toLowerCase();
-
-  if (normalized.includes("bucket not found")) {
-    return "Nie znaleziono bucketa materiałów w Supabase Storage.";
-  }
-
-  if (
-    normalized.includes("row-level security") ||
-    normalized.includes("unauthorized")
-  ) {
-    return "Nie masz uprawnień do wysłania pliku. Sprawdź polityki Storage.";
-  }
-
-  return "Nie udało się wysłać pliku. Spróbuj ponownie.";
-}
 
 export function MaterialUploader({
-  bucketName,
+
   channelType,
   subjectId,
 }: MaterialUploaderProps) {
@@ -100,35 +74,21 @@ export function MaterialUploader({
         return;
       }
 
-      const storedFileName = safeFileName(file.name);
-      const filePath = `materials/subjects/${subjectId}/${crypto.randomUUID()}-${storedFileName}`;
+
 
 
       const actionResult = await addMaterial({
         subjectId,
         channelType,
         title,
-        filePath,
+
+        file,
         fileName: file.name.slice(0, 255),
         pagePath: window.location.pathname,
       });
 
 
-      const { error: uploadError } = await supabase.storage
-        .from(bucketName)
-        .upload(filePath, file, {
-          cacheControl: "3600",
-          contentType: file.type || undefined,
-          upsert: false,
-        });
 
-      if (uploadError) {
-        setResult({
-          success: false,
-          message: storageErrorMessage(uploadError.message),
-        });
-        return;
-      }
 
 
       setResult(actionResult);

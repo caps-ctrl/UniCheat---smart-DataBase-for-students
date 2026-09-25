@@ -6,22 +6,54 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 
 const channelTypes = ["lecture", "lab", "exercises"] as const;
-
+//przenies do schema i dodac obostrzenia do file
 const materialSchema = z.object({
   subjectId: z.number().int().positive(),
   channelType: z.enum(channelTypes),
   title: z.string().trim().min(3).max(100),
-  filePath: z.string().min(1).max(500),
+  file: z.file(),
   fileName: z.string().min(1).max(255),
   pagePath: z.string().startsWith("/materials/").max(700),
 });
 
-export type AddMaterialInput = z.infer<typeof materialSchema>;
+type AddMaterialInput = {
+
+  subjectId: number;
+
+  channelType: string;
+
+  title: string;
+
+  file: File;
+
+  fileName: string;
+
+  pagePath: string;
+
+};
 
 export type AddMaterialResult = {
   success: boolean;
   message: string;
 };
+
+//polaczyc error message
+function storageErrorMessage(message: string) {
+  const normalized = message.toLowerCase();
+
+  if (normalized.includes("bucket not found")) {
+    return "Nie znaleziono bucketa materiałów w Supabase Storage.";
+  }
+
+  if (
+    normalized.includes("row-level security") ||
+    normalized.includes("unauthorized")
+  ) {
+    return "Nie masz uprawnień do wysłania pliku. Sprawdź polityki Storage.";
+  }
+
+  return "Nie udało się wysłać pliku. Spróbuj ponownie.";
+}
 
 function databaseErrorMessage(message: string) {
   const normalized = message.toLowerCase();
@@ -68,12 +100,23 @@ export async function addMaterial(
     };
   }
 
-  const { subjectId, channelType, title, filePath, fileName, pagePath } =
+  const { subjectId, channelType, title, fileName, pagePath, file } =
     parsed.data;
-  const expectedPrefix = `materials/subjects/${subjectId}/`;
 
-  if (!filePath.startsWith(expectedPrefix) || filePath.includes("..")) {
-    return { success: false, message: "Nieprawidłowa ścieżka pliku." };
+  const filePath = `materials/subjects/${subjectId}/${crypto.randomUUID()}-${fileName}/`;
+
+
+  const { error: uploadError } = await supabase.storage
+    .from("materials")
+    .upload(filePath, file, {
+      cacheControl: "3600",
+      contentType: file.type || undefined,
+      upsert: false,
+    });
+
+  if (uploadError) {
+
+    return { success: false, message: storageErrorMessage(uploadError.message) };
   }
 
   const { data: channel, error: channelError } = await supabase
@@ -109,6 +152,7 @@ export async function addMaterial(
     console.error("Nie udało się zapisać materiału:", error);
     return { success: false, message: databaseErrorMessage(error.message) };
   }
+
 
   revalidatePath(pagePath);
 
