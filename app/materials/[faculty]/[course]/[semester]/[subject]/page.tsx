@@ -173,6 +173,7 @@ export default async function SubjectPage({
     activeChannel.type,
   );
 
+  console.log(materials)
   return (
     <main className={styles.page}>
       <div className={styles.shell}>
@@ -265,7 +266,6 @@ export default async function SubjectPage({
               })}
             </div>
           </header>
-
           <div className={styles.contentGrid}>
             <div className={styles.materialsColumn}>
               {materialsError ? (

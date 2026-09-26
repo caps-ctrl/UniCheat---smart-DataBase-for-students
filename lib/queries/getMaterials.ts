@@ -49,6 +49,7 @@ export async function getMaterials(
       data.map((material) => material.file_path),
       SIGNED_URL_LIFETIME_SECONDS,
     );
+  console.log(signedFiles)
 
   if (signedUrlsError) {
     console.error("Nie udało się utworzyć linków do materiałów:", signedUrlsError);
@@ -57,6 +58,7 @@ export async function getMaterials(
   const signedUrlByPath = new Map(
     signedFiles?.map((file) => [file.path, file.signedUrl] as const) ?? [],
   );
+
 
   const materials = data.map((material) => {
     const signedUrl = signedUrlByPath.get(material.file_path);
@@ -67,6 +69,7 @@ export async function getMaterials(
 
     const previewUrl = signedUrl;
     const downloadUrl = new URL(signedUrl);
+
     downloadUrl.searchParams.set("download", material.file_name);
 
     return {

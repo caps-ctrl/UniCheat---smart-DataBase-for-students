@@ -103,7 +103,7 @@ export async function addMaterial(
   const { subjectId, channelType, title, fileName, pagePath, file } =
     parsed.data;
 
-  const filePath = `materials/subjects/${subjectId}/${crypto.randomUUID()}-${fileName}/`;
+  const filePath = `materials/subjects/${subjectId}/${crypto.randomUUID()}-${fileName}`;
 
 
   const { error: uploadError } = await supabase.storage

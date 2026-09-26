@@ -49,6 +49,7 @@ export default function MaterialList({ materials }: MaterialListProps) {
                 {materials.map((material) => {
                     counts[material.title] = (counts[material.title] ?? 0) + 1;
                     const number = counts[material.title];
+
                     return (
                         <li key={material.id} className={styles.materialItem}>
                             <span

@@ -119,7 +119,7 @@ export default function ProfileSettings({
               })}
             </nav>
 
-            <div className={styles.completionCard}>
+            {/*   <div className={styles.completionCard}>
               <div className={styles.completionIcon}>
                 <BookOpen size={20} aria-hidden="true" />
               </div>
@@ -133,7 +133,7 @@ export default function ProfileSettings({
               >
                 <span />
               </div>
-            </div>
+            </div>*/}
           </aside>
 
           <section className={styles.content} aria-live="polite">
