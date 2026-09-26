@@ -1,4 +1,18 @@
-import type { IconName } from "@/types/homePageTypes";
+
+
+type IconName =
+  | "book"
+  | "calendar"
+  | "check"
+  | "clock"
+  | "file"
+  | "grid"
+  | "message"
+  | "play"
+  | "search"
+  | "star"
+  | "user"
+  | "users";
 
 type IconProps = {
   name: IconName;
