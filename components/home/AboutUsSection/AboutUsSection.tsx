@@ -67,7 +67,7 @@ export function AboutUsSection() {
             <p className="mt-6 max-w-xl text-base leading-7 text-emerald-50/80 sm:text-lg">
               uniCheat powstał z prostej obserwacji: wartościowa wiedza jest
               wszędzie, ale trudno do niej dotrzeć. Łączymy ją w jednej,
-              przyjaznej przestrzeni stworzonej z myślą o studentach ZUT.
+              przyjaznej przestrzeni stworzonej z myślą o studentach.
             </p>
 
             <div className="mt-auto pt-10">
@@ -78,7 +78,7 @@ export function AboutUsSection() {
                 <div>
                   <p className="font-extrabold">Lokalnie i po studencku</p>
                   <p className="mt-1 text-sm text-emerald-100/70">
-                    Projekt rozwijany blisko społeczności ZUT
+                    Projekt rozwijany blisko społeczności studenckiej
                   </p>
                 </div>
               </div>

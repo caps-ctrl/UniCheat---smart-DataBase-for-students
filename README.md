@@ -21,7 +21,10 @@
 
 Projekt rozwijany jest jako aplikacja full-stack w Next.js. Warstwa uwierzytelniania, baza danych oraz pliki korzystają z Supabase, natomiast limity operacji obsługuje Upstash Redis.
 
+### konto testowe
 
+email: test1@gmail.com
+password: zaq1@WSX
 
 
 ### Konto i bezpieczeństwo

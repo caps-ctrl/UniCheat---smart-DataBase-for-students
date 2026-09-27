@@ -1,0 +1,315 @@
+.screen {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  min-height: 100svh;
+  width: 100%;
+  place-items: center;
+  overflow: hidden;
+  padding: 32px 20px;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(167, 243, 208, 0.32), transparent 27rem),
+    linear-gradient(145deg, #fbfefd 0%, #f3f9f7 52%, #eef7f3 100%);
+  color: #0f172a;
+}
+
+.ambient {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.orbOne,
+.orbTwo {
+  position: absolute;
+  display: block;
+  border-radius: 999px;
+  filter: blur(2px);
+  opacity: 0.65;
+  animation: drift 8s ease-in-out infinite;
+}
+
+.orbOne {
+  top: -10rem;
+  right: -8rem;
+  width: 28rem;
+  height: 28rem;
+  background: radial-gradient(circle at 35% 35%, rgba(110, 231, 183, 0.32), rgba(16, 185, 129, 0.04) 70%);
+}
+
+.orbTwo {
+  bottom: -12rem;
+  left: -9rem;
+  width: 30rem;
+  height: 30rem;
+  background: radial-gradient(circle at 60% 40%, rgba(37, 107, 216, 0.13), rgba(37, 107, 216, 0.02) 70%);
+  animation-delay: -4s;
+}
+
+.grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(15, 118, 85, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 118, 85, 0.035) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(circle at center, black, transparent 72%);
+}
+
+.loader {
+  display: flex;
+  width: min(100%, 420px);
+  flex-direction: column;
+  align-items: center;
+  padding: clamp(30px, 7vw, 48px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 32px;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 30px 80px rgba(6, 78, 59, 0.1),
+    inset 0 1px 0 #fff;
+  text-align: center;
+  backdrop-filter: blur(18px);
+  animation: appear 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.markWrap {
+  position: relative;
+  display: grid;
+  width: 112px;
+  height: 112px;
+  margin-bottom: 25px;
+  place-items: center;
+}
+
+.mark {
+  display: grid;
+  width: 76px;
+  height: 76px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 25px;
+  background: linear-gradient(145deg, #10b981, #047857);
+  color: #fff;
+  box-shadow:
+    0 18px 35px rgba(5, 150, 105, 0.25),
+    inset 0 1px 1px rgba(255, 255, 255, 0.35);
+  animation: breathe 2.4s ease-in-out infinite;
+}
+
+.markIcon {
+  width: 49px;
+  height: 49px;
+}
+
+.orbit,
+.orbitDot {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+}
+
+.orbit {
+  border: 1px solid rgba(5, 150, 105, 0.18);
+  border-top-color: rgba(5, 150, 105, 0.75);
+  animation: spin 2.3s linear infinite;
+}
+
+.orbitDot {
+  animation: spin 2.3s linear infinite;
+}
+
+.orbitDot::before {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 3px 10px rgba(5, 150, 105, 0.4);
+  content: "";
+  transform: translateX(-50%);
+}
+
+.brand {
+  color: #111827;
+  font-size: clamp(28px, 7vw, 35px);
+  font-weight: 800;
+  letter-spacing: -0.055em;
+  line-height: 1;
+}
+
+.brand span {
+  color: #059669;
+}
+
+.message {
+  max-width: 270px;
+  margin: 13px 0 25px;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 550;
+  line-height: 1.55;
+}
+
+.progress {
+  position: relative;
+  width: min(100%, 250px);
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e2eee9;
+}
+
+.progress span {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #047857, #34d399, #047857);
+  transform: translateX(-100%);
+  animation: progress 1.65s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+.steps {
+  display: flex;
+  gap: 7px;
+  margin-top: 18px;
+}
+
+.steps span {
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: #cbd5e1;
+  animation: stepPulse 1.4s ease-in-out infinite;
+}
+
+.steps span:nth-child(2) {
+  animation-delay: 0.18s;
+}
+
+.steps span:nth-child(3) {
+  animation-delay: 0.36s;
+}
+
+.steps .stepActive {
+  background: #10b981;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.055);
+  }
+}
+
+@keyframes progress {
+  0% {
+    transform: translateX(-100%);
+  }
+  55% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes stepPulse {
+  0%,
+  100% {
+    opacity: 0.38;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(1.2rem, -1rem, 0) scale(1.04);
+  }
+}
+
+@media (max-width: 520px) {
+  .loader {
+    border-radius: 26px;
+  }
+
+  .markWrap {
+    width: 102px;
+    height: 102px;
+  }
+
+  .mark {
+    width: 70px;
+    height: 70px;
+    border-radius: 22px;
+  }
+
+  .markIcon {
+    width: 45px;
+    height: 45px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loader,
+  .mark,
+  .orbit,
+  .orbitDot,
+  .progress span,
+  .steps span,
+  .orbOne,
+  .orbTwo {
+    animation: none;
+  }
+
+  .orbitDot {
+    transform: rotate(45deg);
+  }
+
+  .progress span {
+    transform: translateX(-25%);
+  }
+}
