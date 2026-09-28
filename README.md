@@ -84,6 +84,7 @@ password: zaq1@WSX
 | Uwierzytelnianie | Supabase Auth, `@supabase/ssr` |
 | Dane | PostgreSQL przez Supabase Data API |
 | Pliki | Supabase Storage |
+| Migracje | Supabase CLI, PostgreSQL SQL |
 | Walidacja | Zod |
 | Rate limiting | Upstash Redis, `@upstash/ratelimit` |
 | CAPTCHA | Cloudflare Turnstile |
@@ -94,9 +95,10 @@ password: zaq1@WSX
 
 Przed uruchomieniem przygotuj:
 
-- Node.js 20 lub nowszy,
+- Node.js 22 lub nowszy,
 - npm,
 - projekt Supabase,
+- Docker Desktop lub inny runtime zgodny z Dockerem — tylko dla lokalnego Supabase,
 - bazę Upstash Redis,
 - widget Cloudflare Turnstile.
 
@@ -146,7 +148,13 @@ Przed uruchomieniem przygotuj:
 
 ## Konfiguracja Supabase
 
-Repozytorium zawiera wygenerowane typy bazy w `lib/database.types.ts`, ale nie zawiera kompletnego zestawu migracji. Projekt oczekuje następujących tabel:
+Repozytorium zawiera konfigurację Supabase CLI, migrację schematu oraz wygenerowane typy TypeScript:
+
+- `supabase/config.toml` — konfiguracja lokalnych usług Supabase,
+- `supabase/migrations/20260927232148_remote_schema.sql` — aktualny schemat bazy,
+- `lib/database.types.ts` — typy używane przez aplikację.
+
+Migracja tworzy:
 
 - `profiles`,
 - `faculties`,
@@ -157,18 +165,56 @@ Repozytorium zawiera wygenerowane typy bazy w `lib/database.types.ts`, ale nie z
 - `materials`,
 - `material_reports`.
 
-W Supabase należy dodatkowo:
+Zawiera również enumy kanałów i motywów, klucze obce, ograniczenia integralności, triggery profilu, RLS oraz polityki dostępu do tabel i plików.
+
+### Lokalna baza danych
+
+Uruchom usługi Supabase w kontenerach:
+
+```bash
+npx supabase start
+```
+
+Przy pierwszym uruchomieniu migracje zostaną zastosowane automatycznie. Aby później odtworzyć lokalną bazę od zera na podstawie plików migracji, użyj:
+
+```bash
+npx supabase db reset --local --no-seed
+```
+
+Flaga `--no-seed` jest potrzebna, dopóki projekt nie zawiera pliku `supabase/seed.sql`.
+
+### Zdalny projekt Supabase
+
+Po uwierzytelnieniu Supabase CLI połącz repozytorium ze swoim projektem:
+
+```bash
+npx supabase link --project-ref <project-ref>
+```
+
+Najpierw sprawdź plan migracji, a następnie zastosuj go do podłączonej bazy:
+
+```bash
+npx supabase db push --linked --dry-run
+npx supabase db push --linked
+npx supabase migration list --linked
+```
+
+`db push` zmienia schemat zdalnej bazy. Przed wykonaniem polecenia na środowisku produkcyjnym wykonaj kopię zapasową i przejrzyj wygenerowany plan.
+
+### Dodatkowa konfiguracja
+
+Po zastosowaniu migracji należy dodatkowo:
 
 1. Utworzyć prywatny bucket Storage o nazwie `materials`.
-2. Włączyć RLS dla tabel dostępnych przez Data API.
-3. Dodać polityki umożliwiające użytkownikowi odczyt potrzebnych danych oraz zarządzanie własnym profilem i materiałami.
-4. Skonfigurować callback uwierzytelniania:
+   Migracja dodaje polityki dostępu do `storage.objects`, ale nie tworzy samego bucketu.
+2. Upewnić się, że tabele schematu `public` są dostępne przez Data API. Migracja zawiera wymagane granty oraz włącza RLS.
+3. Skonfigurować callback uwierzytelniania:
 
    ```text
    http://localhost:3000/auth/confirm
    ```
 
-5. W ustawieniach Supabase Auth skonfigurować Cloudflare Turnstile przy użyciu odpowiadającego mu secret key.
+4. W ustawieniach Supabase Auth skonfigurować Cloudflare Turnstile przy użyciu odpowiadającego mu secret key.
 
 Materiały są udostępniane przez signed URLs ważne przez godzinę, dlatego bucket nie musi być publiczny.
 
@@ -223,6 +269,9 @@ zutlearning/
 │   ├── redis/              # Klient i limity Upstash
 │   └── supabase/           # Klienci browser/server oraz obsługa sesji
 ├── public/                 # Ikony i animacje Lottie
+├── supabase/
+│   ├── migrations/         # Wersjonowany schemat PostgreSQL, RLS i polityki
+│   └── config.toml         # Lokalne środowisko Supabase CLI
 ├── proxy.ts                # Odświeżanie sesji i ochrona tras
 └── lib/database.types.ts   # Typy wygenerowane ze schematu Supabase
 ```
@@ -249,6 +298,7 @@ Proxy chroni trasę `/profile` i przekierowuje zalogowanych użytkowników z `/l
 ## Zasady pracy z projektem
 
 - Nie zapisuj sekretów ani plików `.env*` w repozytorium.
+- Każdą zmianę schematu zapisuj jako nową migrację w `supabase/migrations`.
 - Po zmianie schematu Supabase zaktualizuj `lib/database.types.ts`.
 - Wszystkie nowe tabele dostępne przez Data API powinny mieć włączone RLS.
 - Waliduj dane zarówno w interfejsie, jak i w Server Actions.
@@ -263,7 +313,7 @@ Najbliższe naturalne kierunki rozwoju projektu:
 - panel moderacji materiałów i zgłoszeń,
 - trwała obsługa zdjęć profilowych,
 - testy jednostkowe, integracyjne i end-to-end,
-- automatyczne migracje oraz seed danych akademickich.
+- seed danych akademickich oraz automatyczna weryfikacja migracji w CI.
 
 ---
 
