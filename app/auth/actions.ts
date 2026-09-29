@@ -41,9 +41,7 @@ function authErrorMessage(message: string) {
   if (normalized.includes("rate limit")) {
     return "Zbyt wiele prób. Odczekaj chwilę i spróbuj ponownie.";
   }
-  if (normalized.includes("23505")) {
-    return "Nazwa uytkownika juz jest zajeta.";
-  }
+
 
   return "Nie udało się wykonać operacji. Spróbuj ponownie.";
 }
@@ -82,7 +80,7 @@ export async function login(
   const { error } = await supabase.auth.signInWithPassword({ email, password, options: { captchaToken } });
 
   if (error) {
-    return { message: error.message };
+    return { message: authErrorMessage(error.message) };
   }
 
   redirect("/profile");
@@ -94,7 +92,7 @@ export async function register(
 ): Promise<AuthState> {
 
   const ip = await getClientIp();
-  console.log(ip)
+
 
   if (ip) {
     const { success } = await authRateLimit.limit(ip)
@@ -150,11 +148,11 @@ export async function register(
   if (error) {
 
 
-    console.error(error.message)
+
 
 
     return {
-      message: error.message,
+      message: authErrorMessage(error.message),
 
     };
 
