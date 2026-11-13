@@ -216,6 +216,40 @@
   opacity: 0.5;
 }
 
+.logoutForm {
+  margin-top: 10px;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 10px;
+}
+
+.logoutButton {
+  display: grid;
+  width: 100%;
+  min-height: 46px;
+  grid-template-columns: 20px 1fr;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  border-radius: 12px;
+  padding: 0 12px;
+  cursor: pointer;
+  background: transparent;
+  color: #be123c;
+  text-align: left;
+  font: inherit;
+  font-weight: 750;
+  transition: background 180ms ease, opacity 180ms ease;
+}
+
+.logoutButton:hover {
+  background: #fff1f2;
+}
+
+.logoutButton:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
 .completionCard {
   display: grid;
   grid-template-columns: 38px 1fr;

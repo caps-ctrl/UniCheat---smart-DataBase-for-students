@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { NavBar } from "@/components/layout/Navbar/NavBar";
 import CommunityForum from "./CommunityForum";
 import styles from "./spolecznosc.module.css";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Społeczność studentów | uniCheat",
@@ -9,7 +10,13 @@ export const metadata: Metadata = {
     "Forum studentów ZUT: pytania, dyskusje, pomoc w nauce i wymiana doświadczeń.",
 };
 
+
+
+
 export default function CommunityPage() {
+  const supabase = createClient();
+
+
   return (
     <main className={styles.page}>
       <div className={styles.shell}>

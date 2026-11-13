@@ -2,9 +2,9 @@ export type NavBarVariant = "home" | "faq";
 
 export const navBarData = {
   items: [
-    { label: "Wykładowcy(soon)", href: "/" },
+    { label: "Wykładowcy(soon)", href: "/lecturers" },
     { label: "Materiały", href: "/materials" },
-    { label: "Społeczność(soon)", href: "/" },
+    { label: "Społeczność(soon)", href: "/community" },
     { label: "FAQ", href: "/faq" },
   ],
   action: {

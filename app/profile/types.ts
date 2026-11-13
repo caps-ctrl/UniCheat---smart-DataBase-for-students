@@ -40,6 +40,7 @@ export type ProfileFormType = Pick<ProfileRow,
 export type ProfileSettingsProps = {
   navigationBar: ReactNode;
   data: ProfileFormType;
+  role: ProfileRow["role"];
   faculties: ProfileFacultyOption[];
   courses: ProfileCourseOption[];
 };

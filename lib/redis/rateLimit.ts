@@ -18,6 +18,20 @@ export const reportRateLimit = new Ratelimit({
     analytics: true,
 });
 
+export const commentRateLimit = new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(5, "10 m"),
+    prefix: "lecturer-comment",
+    analytics: true,
+});
+
+export const lecturerCommentReportRateLimit = new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(3, "10 m"),
+    prefix: "lecturer-comment-report",
+    analytics: true,
+});
+
 
 
 

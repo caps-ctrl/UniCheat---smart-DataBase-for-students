@@ -28,6 +28,7 @@ export default async function ProfilePage() {
   return (
     <ProfileSettings
       data={profile}
+      role={profile.role}
       faculties={options.faculties}
       courses={options.courses}
       navigationBar={<NavBar />}

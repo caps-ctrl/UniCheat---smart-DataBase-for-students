@@ -146,14 +146,8 @@ export async function register(
   });
 
   if (error) {
-
-
-
-
-
     return {
       message: authErrorMessage(error.message),
-
     };
 
 

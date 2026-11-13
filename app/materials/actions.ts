@@ -90,7 +90,7 @@ export async function saveStudySelection(
     console.error("Nie udało się zapisać kierunku użytkownika:", updateError);
     return {
       status: "error",
-      message: "Nie udało się zapisać wyboru. Spróbuj ponownie.",
+      message: `Nie udało się zapisać kierunku użytkownika. Spróbuj ponownie.`,
     };
   }
 

@@ -119,8 +119,7 @@
   gap: 10px;
 }
 
-.search,
-.select {
+.search {
   position: relative;
   display: flex;
   height: 46px;
@@ -132,8 +131,7 @@
   transition: border-color 180ms ease, box-shadow 180ms ease;
 }
 
-.search:focus-within,
-.select:focus-within {
+.search:focus-within {
   border-color: #10b981;
   box-shadow: 0 0 0 4px rgb(16 185 129 / 10%);
 }
@@ -156,22 +154,6 @@
 
 .search input::placeholder {
   color: #94a3b8;
-}
-
-.select {
-  padding-left: 13px;
-}
-
-.select select {
-  max-width: 190px;
-  height: 100%;
-  border: 0;
-  outline: none;
-  padding: 0 34px 0 9px;
-  background: transparent;
-  color: #475569;
-  font-size: 13px;
-  font-weight: 650;
 }
 
 .visuallyHidden {
@@ -254,18 +236,6 @@
   color: #0e7490;
 }
 
-.facultyBadge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  border-radius: 999px;
-  padding: 6px 9px;
-  background: #f1f5f9;
-  color: #64748b;
-  font-size: 10px;
-  font-weight: 800;
-}
-
 .cardBody {
   flex: 1;
   padding: 18px 22px 22px;
@@ -278,47 +248,20 @@
   letter-spacing: -0.02em;
 }
 
-.facultyName {
-  min-height: 36px;
-  margin: 5px 0 0;
-  color: #64748b;
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.rating {
+.email {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 18px;
-  border-top: 1px solid #edf1f5;
-  border-bottom: 1px solid #edf1f5;
-  padding: 13px 0;
-}
-
-.rating > span {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.rating > span:first-child {
-  color: #f59e0b;
-}
-
-.rating strong {
-  color: #334155;
-  font-size: 14px;
-}
-
-.reviewCount {
+  gap: 7px;
+  margin-top: 10px;
   color: #64748b;
-  font-size: 11px;
+  font-size: 12px;
+  overflow-wrap: anywhere;
 }
 
 .subjects {
-  margin-top: 17px;
+  margin-top: 20px;
+  border-top: 1px solid #edf1f5;
+  padding-top: 16px;
 }
 
 .subjectsLabel {
@@ -328,34 +271,34 @@
   color: #475569;
   font-size: 11px;
   font-weight: 800;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .subjects ul {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
   gap: 7px;
-  margin: 11px 0 0;
+  margin: 12px 0 0;
   padding: 0;
   list-style: none;
 }
 
 .subjects li {
-  position: relative;
-  padding-left: 14px;
-  color: #64748b;
-  font-size: 12px;
-  line-height: 1.45;
+  border: 1px solid #d1fae5;
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: #ecfdf5;
+  color: #047857;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.35;
 }
 
-.subjects li::before {
-  position: absolute;
-  top: 0.55em;
-  left: 0;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #34d399;
-  content: "";
+.noSubjects {
+  margin: 10px 0 0;
+  color: #94a3b8;
+  font-size: 12px;
 }
 
 .cardAction {
@@ -437,9 +380,7 @@
   }
 
   .heroStats {
-    display: grid;
-    width: 100%;
-    grid-template-columns: repeat(3, 1fr);
+    display: inline-flex;
   }
 
   .heroStats div {
@@ -451,9 +392,7 @@
     flex-direction: column;
   }
 
-  .search,
-  .select,
-  .select select {
+  .search {
     width: 100%;
     max-width: none;
   }
@@ -466,7 +405,6 @@
 @media (prefers-reduced-motion: reduce) {
   .card,
   .search,
-  .select,
   .cardAction {
     transition-duration: 0.01ms;
   }

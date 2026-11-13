@@ -49,10 +49,12 @@ export default function AuthPage({ mode }: AuthPageProps) {
     {},
   );
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-
+  const [turnstileReady, setTurnstileReady] = useState(false);
 
   useEffect(() => {
-    turnstileRef.current?.reset();
+    if (turnstileReady) {
+      turnstileRef.current?.reset();
+    }
   }, [state]);
 
 
@@ -93,6 +95,8 @@ export default function AuthPage({ mode }: AuthPageProps) {
       return;
     }
   }, [mode]);
+
+
 
   function saveDraft(form: HTMLFormElement) {
 
@@ -150,7 +154,7 @@ export default function AuthPage({ mode }: AuthPageProps) {
 
                 ref={turnstileRef}
                 siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-
+                onWidgetLoad={() => setTurnstileReady(true)}
                 onSuccess={(token) => {
 
                   setCaptchaToken(token);

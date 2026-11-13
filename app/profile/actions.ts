@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 
@@ -54,6 +55,18 @@ export type UpdateProfileState = {
   status: "idle" | "success" | "error";
   message: string;
 };
+
+export async function signOut() {
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signOut({ scope: "local" });
+
+  if (error) {
+    console.error("Nie udało się wylogować użytkownika:", error);
+    throw new Error("Nie udało się wylogować. Spróbuj ponownie.");
+  }
+
+  redirect("/login");
+}
 
 
 

@@ -3,9 +3,11 @@
 import { ProfileForm } from "./components/ProfileForm/ProfileForm";
 import { NotificationsForm } from "./components/NotificationsForm/NotificationForm";
 import { SecurityForm } from "./components/SecurityForm/SecurityForm";
-import { AlertCircle, BookOpen, Check, ChevronRight } from "lucide-react";
+import { LogoutButton } from "./components/LogoutButton";
+import { AlertCircle, Check, ChevronRight, Shield } from "lucide-react";
 import { type FormEvent, useActionState, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import styles from "./profile.module.css";
 import { navigation } from "@/data/profile/sideBarData";
 import type { Section, ProfileSettingsProps } from "./types";
@@ -23,6 +25,7 @@ import {
 export default function ProfileSettings({
   navigationBar,
   data,
+  role,
   faculties,
   courses,
 }: ProfileSettingsProps) {
@@ -117,23 +120,22 @@ export default function ProfileSettings({
                   </button>
                 );
               })}
+              {(role === "moderator" || role === "admin") && (
+                <Link href="/moderator" className={styles.navItem}>
+                  <Shield size={19} aria-hidden="true" />
+                  <span>Otwórz panel moderatora</span>
+                  <ChevronRight
+                    className={styles.chevron}
+                    size={17}
+                    aria-hidden="true"
+                  />
+                </Link>
+              )}
             </nav>
 
-            {/*   <div className={styles.completionCard}>
-              <div className={styles.completionIcon}>
-                <BookOpen size={20} aria-hidden="true" />
-              </div>
-              <div>
-                <strong>Profil uzupełniony w 80%</strong>
-                <p>Dodaj rok studiów, aby inni łatwiej mogli Ci pomóc.</p>
-              </div>
-              <div
-                className={styles.progress}
-                aria-label="Profil uzupełniony w 80 procentach"
-              >
-                <span />
-              </div>
-            </div>*/}
+            <LogoutButton />
+
+
           </aside>
 
           <section className={styles.content} aria-live="polite">

@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed": "node --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/seed.mjs",
+    "seed:check": "node --test scripts/seed.test.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
