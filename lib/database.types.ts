@@ -57,13 +57,13 @@ isOneToOne: false
                   ]
                 },"lecturer_comments": {
                   Row: {
-                    "content": string,"created_at": string,"id": number,"lecturer_id": number,"rating": number,"updated_at": string,"user_id": string
+                    "content": string,"created_at": string,"deleted_at": string | null,"id": number,"lecturer_id": number,"rating": number,"updated_at": string,"user_id": string
                   }
                   Insert: {
-                    "content": string,"created_at"?: string,"id"?: number,"lecturer_id": number,"rating": number,"updated_at"?: string,"user_id": string
+                    "content": string,"created_at"?: string,"deleted_at"?: string | null,"id"?: number,"lecturer_id": number,"rating": number,"updated_at"?: string,"user_id": string
                   }
                   Update: {
-                    "content"?: string,"created_at"?: string,"id"?: number,"lecturer_id"?: number,"rating"?: number,"updated_at"?: string,"user_id"?: string
+                    "content"?: string,"created_at"?: string,"deleted_at"?: string | null,"id"?: number,"lecturer_id"?: number,"rating"?: number,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -126,13 +126,13 @@ isOneToOne: false
                   ]
                 },"materials": {
                   Row: {
-                    "channel_type": Database["public"]['Enums']["channel_type"],"created_at": string,"file_name": string,"file_path": string,"id": number,"subject_id": number,"title": string,"uploaded_by": string | null
+                    "channel_type": Database["public"]['Enums']["channel_type"],"created_at": string,"deleted_at": string | null,"file_name": string,"file_path": string,"id": number,"subject_id": number,"title": string,"uploaded_by": string | null
                   }
                   Insert: {
-                    "channel_type": Database["public"]['Enums']["channel_type"],"created_at"?: string,"file_name": string,"file_path": string,"id"?: number,"subject_id": number,"title": string,"uploaded_by"?: string | null
+                    "channel_type": Database["public"]['Enums']["channel_type"],"created_at"?: string,"deleted_at"?: string | null,"file_name": string,"file_path": string,"id"?: number,"subject_id": number,"title": string,"uploaded_by"?: string | null
                   }
                   Update: {
-                    "channel_type"?: Database["public"]['Enums']["channel_type"],"created_at"?: string,"file_name"?: string,"file_path"?: string,"id"?: number,"subject_id"?: number,"title"?: string,"uploaded_by"?: string | null
+                    "channel_type"?: Database["public"]['Enums']["channel_type"],"created_at"?: string,"deleted_at"?: string | null,"file_name"?: string,"file_path"?: string,"id"?: number,"subject_id"?: number,"title"?: string,"uploaded_by"?: string | null
                   }
                   Relationships: [
                     {
@@ -144,6 +144,25 @@ isOneToOne: false
     },{
       foreignKeyName: "materials_uploaded_by_fkey"
       columns: ["uploaded_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"moderation_actions": {
+                  Row: {
+                    "action": string,"created_at": string | null,"id": number,"moderator_id": string | null,"reason": string | null,"report_id": number | null,"report_type": string | null
+                  }
+                  Insert: {
+                    "action": string,"created_at"?: string | null,"id"?: never,"moderator_id"?: string | null,"reason"?: string | null,"report_id"?: number | null,"report_type"?: string | null
+                  }
+                  Update: {
+                    "action"?: string,"created_at"?: string | null,"id"?: never,"moderator_id"?: string | null,"reason"?: string | null,"report_id"?: number | null,"report_type"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "moderation_actions_moderator_id_fkey"
+      columns: ["moderator_id"]
 isOneToOne: false
       referencedRelation: "profiles"
       referencedColumns: ["id"]
@@ -287,6 +306,15 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
+            "moderate_report": {
+              Args: {
+                p_reason?: string
+                p_report_id: number
+                p_report_table: string
+                p_status: Database["public"]["Enums"]["reportStatus_type"]
+              }
+              Returns: undefined
+            }
             "get_comment_reports_page": {
               Args: {
                 p_cursor_created_at?: string

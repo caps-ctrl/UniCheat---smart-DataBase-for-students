@@ -9,7 +9,7 @@
   </p>
 
   <p>
-    <strong>Materiały • profile studentów • wykładowcy • społeczność</strong>
+    <strong>Materiały • profile studentów • wykładowcy • moderacja • społeczność</strong>
   </p>
 </div>
 
@@ -57,6 +57,7 @@ password: zaq1@WSX
 ### Pozostałe moduły
 
 - katalog wykładowców z wyszukiwaniem i profilami,
+- komentarze i oceny wykładowców, edycja własnych opinii oraz zgłaszanie komentarzy,
 - widok społeczności studenckiej,
 - sekcja FAQ,
 - animowany landing page prezentujący platformę.
@@ -70,8 +71,60 @@ password: zaq1@WSX
 | Wydziały, kierunki, semestry i przedmioty | Supabase Database | Podłączone |
 | Materiały i zgłoszenia | Supabase Database + Storage | Podłączone |
 | Limity operacji | Upstash Redis | Podłączone |
-| Katalog wykładowców | Dane lokalne w `data/lecturers` | Wersja demonstracyjna |
+| Katalog wykładowców, opinie i oceny | Supabase Database | Podłączone |
+| Panel moderatora i historia decyzji | Supabase Database + RPC `moderate_report` | Podłączone |
 | Społeczność | Dane lokalne w komponencie | Wersja demonstracyjna |
+
+## Panel moderatora
+
+Panel jest dostępny pod `/moderator` dla zalogowanych użytkowników z rolą `moderator` lub `admin` w `profiles.role`. Osoba niezalogowana jest przekierowywana do `/login`, a użytkownik bez odpowiedniej roli — do `/profile`. Uprawnienia są ponownie sprawdzane w Server Actions i w funkcji bazy danych.
+
+Panel łączy zgłoszenia materiałów (`material_reports`) i komentarzy wykładowców (`reported_lecturer_comments`). Pokazuje powód zgłoszenia, autora zgłoszenia i podgląd treści. Udostępnia wyszukiwanie, filtry rodzaju i statusu oraz paginację kursorową po 10 zgłoszeń. Oczekujące zgłoszenia są wyświetlane najpierw; filtry i liczniki dotyczą bieżącej strony.
+
+### Decyzje i opis moderatora
+
+| Przycisk | Status zgłoszenia | Wpływ na zgłoszoną treść |
+| --- | --- | --- |
+| Przyjmij zgłoszenie | `pending` → `resolved` | Ustawia `deleted_at` w `materials` lub `lecturer_comments` |
+| Odrzuć zgłoszenie | `pending` → `rejected` | Pozostawia treść bez zmian |
+| Przywróć do oczekujących | `resolved` / `rejected` → `pending` | Nie przywraca usuniętej treści |
+
+Przed każdą decyzją można uzupełnić pole **Opis decyzji**: opcjonalne uzasadnienie do 1000 znaków, z licznikiem długości. Opis jest zapisywany w `moderation_actions.reason` razem z akcją. To osobne pole od powodu zgłoszenia podanego przez zgłaszającego. Pusty opis jest pomijany, a skrajne spacje są usuwane.
+
+Szkice opisu są przypisane do poszczególnych zgłoszeń w aktualnym widoku panelu. Pozostają po błędzie zapisu, a po sukcesie opis wykonanej decyzji jest czyszczony. Podczas zapisu pole i przyciski decyzji są zablokowane. Panel pokazuje wynik operacji i pobiera świeżą pierwszą stronę, odrzucając wcześniejsze kursory — zmiana statusu wpływa na kolejność zgłoszeń.
+
+### Zapis w bazie i kontrola dostępu
+
+```mermaid
+flowchart TD
+    A[Decyzja i opcjonalny opis w panelu] --> B[Server Action: acceptReport / changeStatus]
+    B --> C[Weryfikacja sesji, roli i danych]
+    C --> D[RPC moderate_report]
+    D --> E[Blokada zgłoszenia i sprawdzenie zmiany statusu]
+    E --> F{Przyjęcie zgłoszenia?}
+    F -->|Tak| G[Ustawienie deleted_at treści]
+    F -->|Nie| H[Zmiana statusu zgłoszenia]
+    G --> H
+    H --> I[Zapis akcji i opisu w moderation_actions]
+    I --> J[Zatwierdzenie transakcji i odświeżenie listy]
+```
+
+Funkcja `public.moderate_report` wykonuje zmianę statusu, ewentualne oznaczenie treści jako usuniętej i zapis historii w jednej transakcji. Błąd dowolnego etapu wycofuje wszystkie zmiany tej operacji. `FOR UPDATE` blokuje wiersz zgłoszenia na czas decyzji; ponowienie tego samego statusu jest odrzucane. Przejście bezpośrednio między `resolved` i `rejected` wymaga wcześniejszego przywrócenia `pending`.
+
+Historia jest zapisywana w istniejącej tabeli **`moderation_actions`**:
+
+| Pole | Zapisywana wartość |
+| --- | --- |
+| `moderator_id` | ID zalogowanego użytkownika pobrane przez `auth.uid()` |
+| `report_id` | ID rozpatrywanego zgłoszenia |
+| `report_type` | `material_reports` lub `reported_lecturer_comments` |
+| `action` | Nowy status: `resolved`, `rejected` lub `pending` |
+| `reason` | Opcjonalny opis decyzji moderatora |
+| `created_at` | Data utworzenia wpisu, zgodnie z domyślną wartością tabeli |
+
+Klient nie przekazuje `moderator_id`. Dodatkowa restrykcyjna polityka RLS wymaga, aby ID moderatora we wpisie było zgodne z `auth.uid()`. Funkcja działa jako `SECURITY INVOKER`, z uprawnieniami wywołującego i obowiązującymi zasadami RLS.
+
+Usuwanie treści jest logiczne: rekord materiału lub komentarza pozostaje w bazie, a istniejąca data `deleted_at` nie jest nadpisywana. Odczyty materiałów, komentarzy i średniej ocen pomijają usunięte wpisy; moderator nadal może zobaczyć treść w podglądzie zgłoszenia. Operacja nie usuwa fizycznie pliku ze Storage i nie unieważnia już wystawionych signed URLs.
 
 ## Stack technologiczny
 
@@ -108,7 +161,7 @@ Przed uruchomieniem przygotuj:
 
    ```bash
    git clone <adres-repozytorium>
-   cd zutlearning
+   cd uniCheat
    ```
 
 2. Zainstaluj zależności:
@@ -148,13 +201,14 @@ Przed uruchomieniem przygotuj:
 
 ## Konfiguracja Supabase
 
-Repozytorium zawiera konfigurację Supabase CLI, migrację schematu oraz wygenerowane typy TypeScript:
+Repozytorium zawiera konfigurację Supabase CLI, migracje oraz typy TypeScript:
 
 - `supabase/config.toml` — konfiguracja lokalnych usług Supabase,
-- `supabase/migrations/20260927232148_remote_schema.sql` — aktualny schemat bazy,
+- `supabase/migrations/20260927232148_remote_schema.sql` — początkowy schemat bazy,
+- `supabase/migrations/20261123201211_moderator_report_actions.sql` — RPC moderacji i uzupełnienie polityk RLS,
 - `lib/database.types.ts` — typy używane przez aplikację.
 
-Migracja tworzy:
+Początkowa migracja tworzy:
 
 - `profiles`,
 - `faculties`,
@@ -167,6 +221,8 @@ Migracja tworzy:
 
 Zawiera również enumy kanałów i motywów, klucze obce, ograniczenia integralności, triggery profilu, RLS oraz polityki dostępu do tabel i plików.
 
+**Wymagania migracji moderacji:** zakłada ona istniejący rozszerzony schemat: tabele `lecturers`, `lecturer_comments`, `reported_lecturer_comments`, `moderation_actions`, kolumny `materials.deleted_at` i `lecturer_comments.deleted_at`, `profiles.role` oraz enum `reportStatus_type`. Odczyt panelu wymaga również funkcji `get_material_reports_page` i `get_comment_reports_page`. Te wcześniejsze rozszerzenia nie są w całości odtworzone w początkowej migracji repozytorium. Sam zestaw obecnych migracji nie wystarcza więc do uruchomienia aktualnej aplikacji na pustej bazie — przed zastosowaniem migracji moderacji trzeba uzupełnić schemat o te definicje.
+
 ### Lokalna baza danych
 
 Uruchom usługi Supabase w kontenerach:
@@ -175,7 +231,7 @@ Uruchom usługi Supabase w kontenerach:
 npx supabase start
 ```
 
-Przy pierwszym uruchomieniu migracje zostaną zastosowane automatycznie. Aby później odtworzyć lokalną bazę od zera na podstawie plików migracji, użyj:
+Supabase stosuje migracje podczas inicjalizacji lokalnej bazy. Przed inicjalizacją lub resetem uzupełnij brakujące migracje rozszerzonego schematu opisane powyżej. Polecenie resetu usuwa lokalne dane i odtwarza bazę z plików migracji:
 
 ```bash
 npx supabase db reset --local --no-seed
@@ -226,6 +282,20 @@ Materiały są udostępniane przez signed URLs ważne przez godzinę, dlatego bu
 | `npm run build` | Tworzy zoptymalizowany build produkcyjny i sprawdza typy |
 | `npm run start` | Uruchamia wcześniej zbudowaną wersję produkcyjną |
 | `npm run lint` | Uruchamia ESLint dla całego projektu |
+| `npm run seed` | Dodaje demonstracyjne dane akademickie, materiały, opinie i zgłoszenia do istniejącej bazy |
+| `npm run seed:check` | Uruchamia testy generatora danych seeda |
+
+Instrukcja i wymagania seeda: [supabase/SEED.md](supabase/SEED.md). Seed nie tworzy kont Auth ani nie nadaje ról moderatora.
+
+### Test transakcji moderacji
+
+Na lokalnej bazie z aktualnym schematem i danymi testowymi:
+
+```bash
+npx supabase db query --local --file scripts/moderator-actions.test.sql
+```
+
+Test wymaga profilu `admin`, profilu `user` oraz zgłoszenia materiału i komentarza. Sprawdza role moderatora i administratora, przyjęcie obu rodzajów zgłoszeń, zapis opisu i tożsamości w historii, blokadę cudzego `moderator_id`, odrzucenie i ponowne otwarcie, powtórzone decyzje oraz wycofanie transakcji przy błędzie zapisu historii. Zmiany testowe są automatycznie wycofywane.
 
 Przed wysłaniem zmian warto wykonać:
 
@@ -246,21 +316,23 @@ npm run build
 | `/materials/[faculty]/[course]` | Lista semestrów kierunku |
 | `/materials/[faculty]/[course]/[semester]` | Przedmioty wybranego semestru |
 | `/materials/[faculty]/[course]/[semester]/[subject]` | Materiały konkretnego przedmiotu |
-| `/lecturer` | Katalog wykładowców |
-| `/lecturer/[slug]` | Profil wykładowcy |
-| `/spolecznosc` | Widok społeczności |
+| `/lecturers` | Katalog wykładowców |
+| `/lecturers/[slug]` | Profil wykładowcy, komentarze i oceny |
+| `/moderator` | Panel zgłoszeń dla administratorów i moderatorów |
+| `/community` | Widok społeczności |
 | `/faq` | Najczęściej zadawane pytania |
 
 ## Struktura projektu
 
 ```text
-zutlearning/
+uniCheat/
 ├── app/                    # Trasy App Routera, strony i Server Actions
 │   ├── auth/               # Logowanie, rejestracja i callback Auth
 │   ├── materials/          # Nawigacja akademicka i materiały
 │   ├── profile/            # Profil oraz ustawienia użytkownika
-│   ├── lecturer/           # Katalog i profile wykładowców
-│   ├── spolecznosc/        # Moduł społeczności
+│   ├── lecturers/          # Katalog, profile, opinie i zgłoszenia komentarzy
+│   ├── moderator/          # Panel zgłoszeń, decyzje i opis moderatora
+│   ├── community/          # Moduł społeczności
 │   └── faq/                # FAQ
 ├── components/             # Komponenty współdzielone, layout i UI
 ├── data/                   # Lokalne dane demonstracyjne
@@ -269,6 +341,7 @@ zutlearning/
 │   ├── redis/              # Klient i limity Upstash
 │   └── supabase/           # Klienci browser/server oraz obsługa sesji
 ├── public/                 # Ikony i animacje Lottie
+├── scripts/                # Seed i test transakcji moderacji
 ├── supabase/
 │   ├── migrations/         # Wersjonowany schemat PostgreSQL, RLS i polityki
 │   └── config.toml         # Lokalne środowisko Supabase CLI
@@ -309,11 +382,10 @@ Proxy chroni trasę `/profile` i przekierowuje zalogowanych użytkowników z `/l
 Najbliższe naturalne kierunki rozwoju projektu:
 
 - przeniesienie forum społeczności do bazy danych,
-- podłączenie katalogu wykładowców i opinii do Supabase,
-- panel moderacji materiałów i zgłoszeń,
+- widok historii decyzji moderatorów i przywracanie usuniętych treści,
 - trwała obsługa zdjęć profilowych,
 - testy jednostkowe, integracyjne i end-to-end,
-- seed danych akademickich oraz automatyczna weryfikacja migracji w CI.
+- uzupełnienie migracji rozszerzonego schematu i ich automatyczna weryfikacja w CI.
 
 ---
 

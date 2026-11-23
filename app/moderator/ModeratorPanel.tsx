@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { ArrowLeft, Check, ChevronLeft, ChevronRight, FileText, Flag, Inbox, MessageSquare, RotateCcw, Search, ShieldCheck, X } from "lucide-react";
 import { channelLabels, kindLabels, reportKey, reportTitle, statusLabels, type ModerationReport, type ModeratorReportsPage, type ReportKind, type ReportStatus } from "./types";
-import { getNextReportsPage } from "./actions";
+import { acceptReport, changeStatus as changeReportStatus, getNextReportsPage } from "./actions";
 import styles from "./moderator.module.css";
 
 const dateFormatter = new Intl.DateTimeFormat("pl-PL", {
@@ -24,6 +24,10 @@ export default function ModeratorPanel({ initialReports, errors: initialErrors, 
   const [pageIndex, setPageIndex] = useState(0);
   const [errors, setErrors] = useState(initialErrors);
   const [isPending, startTransition] = useTransition();
+  const [isSaving, startSaving] = useTransition();
+  const savingRef = useRef(false);
+  const [actionError, setActionError] = useState("");
+  const isBusy = isPending || isSaving;
   const currentPage = pages[pageIndex];
   const reports = currentPage.reports;
   const [kind, setKind] = useState<ReportKind | "all">("all");
@@ -31,22 +35,25 @@ export default function ModeratorPanel({ initialReports, errors: initialErrors, 
   const [query, setQuery] = useState("");
   const [selectedKey, setSelectedKey] = useState<string | null>(initialReports[0] ? reportKey(initialReports[0]) : null);
   const [notice, setNotice] = useState("");
-  //dodac useMemo do filtered
+  const [decisionDescriptions, setDecisionDescriptions] = useState<Record<string, string>>({});
+
   const filtered = reports.filter((item) => {
     const searchable = `${reportTitle(item)} ${item.report.reason} ${(item.reporter?.username ?? "Użytkownik niedostępny")} ${item.report.id} ${item.kind === "material" ? `${(item.material?.file_name ?? "")} ${(item.subject?.name ?? "")}` : (item.comment?.content ?? "")}`;
     return (kind === "all" || item.kind === kind) && (status === "all" || item.report.status === status) && searchable.toLocaleLowerCase("pl").includes(query.trim().toLocaleLowerCase("pl"));
   });
   const selected = filtered.find((item) => reportKey(item) === selectedKey) ?? filtered[0];
+  const decisionDescription = selected ? decisionDescriptions[reportKey(selected)] ?? "" : "";
 
   function showPage(index: number) {
     setPageIndex(index);
     setSelectedKey(null);
     setNotice("");
+    setActionError("");
     setErrors([]);
   }
 
   function nextPage() {
-    if (isPending || !currentPage.hasMore || !currentPage.nextCursor) return;
+    if (isBusy || savingRef.current || !currentPage.hasMore || !currentPage.nextCursor) return;
     if (pages[pageIndex + 1]) {
       showPage(pageIndex + 1);
       return;
@@ -68,19 +75,43 @@ export default function ModeratorPanel({ initialReports, errors: initialErrors, 
   }
 
   function changeStatus(nextStatus: ReportStatus) {
-    if (!selected) return;
-    const key = reportKey(selected);
-    setPages((current) => current.map((page, index) => index !== pageIndex ? page : {
-      ...page,
-      reports: page.reports.map((item) => {
-        if (reportKey(item) !== key) return item;
-        if (item.kind === "material") {
-          return { ...item, report: { ...item.report, status: nextStatus } };
+    if (!selected || isBusy || savingRef.current) return;
+    const report = selected;
+    const key = reportKey(report);
+    const input = {
+      table: report.kind === "material" ? "material_reports" as const : "reported_lecturer_comments" as const,
+      id: report.report.id,
+      reason: decisionDescription.trim() || undefined,
+    };
+    savingRef.current = true;
+    setNotice("");
+    setActionError("");
+    startSaving(async () => {
+      try {
+        const result = nextStatus === "resolved"
+          ? await acceptReport(input)
+          : await changeReportStatus({ ...input, status: nextStatus });
+        if (!result.success || !result.page) {
+          setActionError(result.message);
+          return;
         }
-        return { ...item, report: { ...item.report, status: nextStatus } };
-      }),
-    }));
-    setNotice(`Zgłoszenie #${selected.report.id}: ${statusLabels[nextStatus].toLocaleLowerCase("pl")}. Zmiana została zapisana tylko w podglądzie.`);
+        // Status changes alter the sort order, so discard previous pagination cursors.
+        setPages([result.page]);
+        setPageIndex(0);
+        setSelectedKey(null);
+        setErrors(result.page.errors);
+        setDecisionDescriptions((current) => {
+          const remaining = { ...current };
+          delete remaining[key];
+          return remaining;
+        });
+        setNotice(`Zgłoszenie #${report.report.id}: ${statusLabels[nextStatus].toLocaleLowerCase("pl")}. ${nextStatus === "resolved" ? "Zgłoszona treść została usunięta." : "Zmiana została zapisana."}`);
+      } catch {
+        setActionError("Nie udało się potwierdzić zapisu. Odśwież panel, aby sprawdzić aktualny status zgłoszenia.");
+      } finally {
+        savingRef.current = false;
+      }
+    });
   }
 
   return (
@@ -96,7 +127,7 @@ export default function ModeratorPanel({ initialReports, errors: initialErrors, 
           <span className={styles.demoBadge}>Zgłoszenia społeczności</span>
         </section>
 
-        <div className={styles.demoNote}><ShieldCheck size={20} aria-hidden="true" /><p>Zgłoszenia pochodzą z bazy danych. Zmiany statusów działają na razie tylko lokalnie i znikają po odświeżeniu strony.</p></div>
+        <div className={styles.demoNote}><ShieldCheck size={20} aria-hidden="true" /><p>Decyzje są zapisywane w historii moderacji. Przyjęcie zgłoszenia usuwa zgłoszoną treść z widoku społeczności.</p></div>
 
         {errors.length > 0 && <div className={styles.errorNote} role="alert">{errors.map((error) => <p key={error}>{error}</p>)}<a href="/moderator">Ponów pobieranie</a></div>}
 
@@ -140,19 +171,38 @@ export default function ModeratorPanel({ initialReports, errors: initialErrors, 
                 <dl className={styles.metadata}><div><dt>Zgłaszający</dt><dd>{selected.reporter ? `@${selected.reporter.username}` : "Użytkownik niedostępny"}</dd></div><div><dt>Data zgłoszenia</dt><dd><time dateTime={selected.report.created_at ?? undefined} suppressHydrationWarning>{formatDate(selected.report.created_at)}</time></dd></div></dl>
                 <div className={styles.reasonBox}><h4><Flag size={16} aria-hidden="true" />Powód zgłoszenia</h4><p>{selected.report.reason}</p></div>
                 <div className={styles.preview}><h4>{selected.kind === "material" ? "Zgłoszony materiał" : "Treść komentarza"}</h4>{selected.kind === "material" ? selected.material ? <div className={styles.file}><FileText size={28} aria-hidden="true" /><div><strong>{selected.material.file_name}</strong><span>Dodano: <time dateTime={selected.material.created_at ?? undefined} suppressHydrationWarning>{formatDate(selected.material.created_at)}</time></span><span>{selected.material.uploaded_by ? `Autor: ${selected.material.uploaded_by}` : "Autor niedostępny"}</span></div></div> : <p className={styles.detailSubtitle}>Materiał został usunięty lub nie masz dostępu do jego szczegółów.</p> : selected.comment ? <><p className={styles.rating}>Ocena: {selected.comment.rating} / 5</p><blockquote>{selected.comment.content}</blockquote><p className={styles.detailSubtitle}>Dodano: <time dateTime={selected.comment.created_at ?? undefined} suppressHydrationWarning>{formatDate(selected.comment.created_at)}</time></p></> : <p className={styles.detailSubtitle}>Komentarz został usunięty lub nie masz dostępu do jego treści.</p>}</div>
-                <div className={styles.actions}><h4>Decyzja moderatora</h4><p>Zmiana statusu dotyczy zgłoszenia. Treść pozostaje w podglądzie.</p>{selected.report.status === "pending" ? <div className={styles.actionButtons}><button type="button" className={styles.resolve} onClick={() => changeStatus("resolved")}><Check size={17} aria-hidden="true" />Oznacz jako rozwiązane</button><button type="button" className={styles.reject} onClick={() => changeStatus("rejected")}><X size={17} aria-hidden="true" />Odrzuć zgłoszenie</button></div> : <button type="button" className={styles.reject} onClick={() => changeStatus("pending")}><RotateCcw size={16} aria-hidden="true" />Przywróć do oczekujących</button>}</div>
+                <div className={styles.actions} aria-busy={isSaving}><h4>Decyzja moderatora</h4><p>{selected.report.status === "pending" ? "Przyjęcie zgłoszenia usuwa materiał lub komentarz z widoku społeczności. Odrzucenie pozostawia treść bez zmian." : "Przywrócenie zgłoszenia do oczekujących nie przywraca usuniętej treści."}</p>
+                  <label className={styles.decisionDescription} htmlFor="decision-description">
+                    Opis decyzji (opcjonalny)
+                    <textarea
+                      id="decision-description"
+                      value={decisionDescription}
+                      onChange={(event) => {
+                        const key = reportKey(selected);
+                        const value = event.target.value;
+                        setDecisionDescriptions((current) => ({ ...current, [key]: value }));
+                      }}
+                      maxLength={1000}
+                      disabled={isBusy}
+                      placeholder="Wpisz uzasadnienie przyjęcia, odrzucenia lub przywrócenia zgłoszenia…"
+                      aria-describedby="decision-description-help"
+                    />
+                    <small id="decision-description-help">Opis zostanie zapisany w historii wraz z decyzją. {decisionDescription.length}/1000 znaków.</small>
+                  </label>
+                  {selected.report.status === "pending" ? <div className={styles.actionButtons}><button type="button" disabled={isBusy} className={styles.resolve} onClick={() => changeStatus("resolved")}><Check size={17} aria-hidden="true" />Przyjmij zgłoszenie</button><button type="button" disabled={isBusy} className={styles.reject} onClick={() => changeStatus("rejected")}><X size={17} aria-hidden="true" />Odrzuć zgłoszenie</button></div> : <button type="button" disabled={isBusy} className={styles.reject} onClick={() => changeStatus("pending")}><RotateCcw size={16} aria-hidden="true" />Przywróć do oczekujących</button>}{isSaving && <p role="status">Zapisywanie decyzji…</p>}</div>
               </> : <div className={styles.empty}><ShieldCheck size={40} aria-hidden="true" /><h3>{errors.length > 0 ? "Dane niedostępne" : "Brak zgłoszeń do wyświetlenia"}</h3><p>Wybierz inne filtry, aby zobaczyć pozostałe zgłoszenia.</p></div>}
             </section>
           </div>
+          {actionError && <div className={styles.errorNote} role="alert">{actionError}</div>}
           <nav className={styles.pagination} aria-label="Strony zgłoszeń" aria-busy={isPending}>
-            <button type="button" disabled={pageIndex === 0 || isPending} onClick={() => showPage(pageIndex - 1)}>
+            <button type="button" disabled={pageIndex === 0 || isBusy} onClick={() => showPage(pageIndex - 1)}>
               <ChevronLeft size={16} aria-hidden="true" /> Poprzednia
             </button>
             <div className={styles.pageInfo}>
               <span role="status">{isPending ? "Ładowanie…" : `Strona ${pageIndex + 1}`}</span>
               <small>Filtry i liczniki dotyczą bieżącej strony.</small>
             </div>
-            <button type="button" disabled={!currentPage.hasMore || !currentPage.nextCursor || isPending} onClick={nextPage}>
+            <button type="button" disabled={!currentPage.hasMore || !currentPage.nextCursor || isBusy} onClick={nextPage}>
               Następna <ChevronRight size={16} aria-hidden="true" />
             </button>
           </nav>

@@ -88,11 +88,17 @@
 .actions { border-top: 1px solid #e8edf2; padding-top: 20px; }
 .actions > p { font-size: 11px; color: #8490a0; line-height: 1.7; margin: 0 0 14px; }
 .actionButtons { display: flex; flex-wrap: wrap; gap: 9px; }
+.decisionDescription { display: grid; gap: 7px; margin-bottom: 16px; color: #526174; font-size: 12px; font-weight: 600; }
+.decisionDescription textarea { box-sizing: border-box; width: 100%; min-height: 100px; resize: vertical; border: 1px solid #dfe5ed; border-radius: 9px; padding: 11px 13px; font: inherit; font-weight: 400; line-height: 1.6; color: #334155; background: white; }
+.decisionDescription textarea:focus-visible { outline: 2px solid #058357; outline-offset: 2px; }
+.decisionDescription textarea:disabled { opacity: .6; cursor: not-allowed; }
+.decisionDescription small { color: #64748b; font-size: 11px; font-weight: 400; }
 .resolve, .reject { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border-radius: 9px; padding: 11px 13px; font-size: 11px; font-weight: 700; cursor: pointer; }
 .resolve { background: #058357; color: white; border: 1px solid #058357; }
 .resolve:hover { background: #046b47; }
 .reject { background: white; color: #64748b; border: 1px solid #dfe5ed; }
 .reject:hover { background: #f5f7f9; }
+.resolve:disabled, .reject:disabled { opacity: .5; cursor: not-allowed; }
 .empty { display: grid; justify-items: center; text-align: center; gap: 10px; padding: 60px 18px; color: #94a3b8; }
 .empty h3 { color: #526174; font-size: 17px; margin: 0; }
 .empty p { font-size: 12px; margin: 0; line-height: 1.7; }

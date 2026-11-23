@@ -142,6 +142,7 @@ export async function getLecturerComments(
   const { data, error } = await supabase
     .from("lecturer_comments")
     .select("id, lecturer_id, user_id, content, rating, created_at, author:profiles(username)")
+    .is("deleted_at", null)
     .eq("lecturer_id", lecturerId)
     .order("created_at", { ascending: false })
     .limit(50);
@@ -172,6 +173,7 @@ export async function getLecturerRatingSummary(
     const { data, error } = await supabase
       .from("lecturer_comments")
       .select("id, rating")
+      .is("deleted_at", null)
       .eq("lecturer_id", lecturerId)
       .gt("id", lastSeenId)
       .order("id", { ascending: true })

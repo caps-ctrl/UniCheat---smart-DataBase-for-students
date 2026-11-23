@@ -30,6 +30,7 @@ export async function getMaterials(
     .select("id, title, file_name, file_path, created_at, uploaded_by")
     .eq("subject_id", subjectId)
     .eq("channel_type", channelType)
+    .is("deleted_at", null)
     .order("created_at", { ascending: false })
     .limit(10);
 
