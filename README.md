@@ -14,6 +14,8 @@
 </div>
 
 ---
+## SZYBKI LINK DLA REKUTERA
+https://uni-cheat-smart-data-base-for-stude.vercel.app
 
 ## O projekcie
 
