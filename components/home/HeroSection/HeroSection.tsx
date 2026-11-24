@@ -1,6 +1,7 @@
 import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 import { Icon } from "@/components/ui/Icon";
 import styles from "./heroSection.module.css";
+import Link from "next/link";
 
 export function HeroSection() {
   return (
@@ -13,10 +14,10 @@ export function HeroSection() {
         </p>
 
         <div className={styles.heroActions}>
-          <a className="primary-button" href="#start">
+          <Link className="primary-button" href="/register">
             Zacznij
-          </a>
-          <a className="ghost-button" href="#kursy">
+          </Link>
+          <a className="ghost-button" href="#oferta">
             <Icon name="play" />
             Zobacz co oferujemy
           </a>

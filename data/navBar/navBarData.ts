@@ -8,8 +8,8 @@ export const navBarData = {
     { label: "FAQ", href: "/faq" },
   ],
   action: {
-    label: "Dołącz",
-    href: "/register",
+    label: "Zaloguj",
+    href: "/login",
     showBackArrow: false,
   },
 };

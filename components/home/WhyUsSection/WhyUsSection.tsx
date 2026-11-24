@@ -4,7 +4,11 @@ import { StudentNetwork } from "./StudentNetwork";
 
 export function WhyUsSection() {
   return (
-    <section className="relative py-20 sm:py-24" aria-labelledby="why-us-title">
+    <section
+      id="oferta"
+      className="relative scroll-mt-24 py-20 sm:py-24"
+      aria-labelledby="why-us-title"
+    >
       <div className="mb-10 max-w-2xl">
         <p className="mb-3 text-sm font-bold uppercase tracking-[0.2em] text-emerald-600">
           Razem studiuje się łatwiej

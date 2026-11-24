@@ -23,7 +23,13 @@ Projekt rozwijany jest jako aplikacja full-stack w Next.js. Warstwa uwierzytelni
 
 ### konto testowe
 
-email: test1@gmail.com
+email: seed_student1@example.invalid
+password: zaq1@WSX
+
+email: seed_student2@example.invalid
+password: zaq1@WSX
+
+email: seed_student3@example.invalid
 password: zaq1@WSX
 
 
